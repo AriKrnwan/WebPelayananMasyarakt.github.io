@@ -22,18 +22,18 @@
 @media (max-width: 768px) {
     .bubble-input {
         background-color: #333;
-        width: 320px;
+        width: 280px;
         bottom: 28px;
-        left: 8px;
+        left: 0px;
     }
 
     .bubble-input .arrow {
-        height: 12px;
+        height: 12px;   
         width: 12px;
         background-color: #333;
         rotate: 45deg;
         bottom: -12px;
-        left: 295px;
+        left: 256px;
         border-radius: 2px;
     }
 }
