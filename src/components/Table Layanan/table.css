@@ -9,3 +9,37 @@ td {
     font-weight: 400;
     padding: 10px !important;
 }
+
+.fixed-table-container {
+    overflow-x: auto;
+}
+
+.fixed-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.fixed-table th, .fixed-table td {
+    word-wrap: break-word;
+    white-space: nowrap;
+}
+
+.col-no {
+    width: 50px;
+}
+
+.col-nopel {
+    width: 150px;
+}
+
+.col-tanggal {
+    width: 150px;
+}
+
+.col-status {
+    width: 150px;
+}
+
+.col-aksi {
+    width: 200px;
+}

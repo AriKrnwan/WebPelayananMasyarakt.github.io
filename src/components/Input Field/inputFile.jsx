@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { BsQuestionCircleFill } from "react-icons/bs";
 import './input.css';
 
-function InputFile({ label, moreInfo }) {
+function InputFile({ label, moreInfo, disabled }) {
     const [files, setFiles] = useState([]);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -24,14 +24,12 @@ function InputFile({ label, moreInfo }) {
             <div className="input-field col-lg-6 py-2 mb-2">
                 <div className="label-more mb-1 d-flex align-items-center justify-content-between position-relative">
                     <Form.Label className='ubuntu-sans-medium mb-1' style={{fontSize: '.85rem'}}>{label}</Form.Label>
-                    {/* Tampilkan ikon hanya jika prop moreInfo memiliki nilai */}
                     {moreInfo && (
                         <BsQuestionCircleFill size={'14px'} color='#bdbdbd' className="m-0 overflow-hidden"
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)} 
                         />
                     )}
-                    {/* Tampilkan bubble info hanya jika prop moreInfo memiliki nilai dan isHovered bernilai true */}
                     {moreInfo && isHovered && (
                         <div className="bubble-input p-2 position-absolute rounded">
                             <div className="isi-bubble-chat position-relative">
@@ -48,12 +46,13 @@ function InputFile({ label, moreInfo }) {
                     multiple
                     onChange={handleFileChange}
                     style={{fontSize: '.85rem'}}
+                    disabled={disabled}
                 />
                 <div>
                     {files.map((file, index) => (
                         <div key={index}>
                             <span>{file.name}</span>
-                            <button onClick={() => handleFileDelete(index)}>Delete</button>
+                            {!disabled && <button onClick={() => handleFileDelete(index)}>Delete</button>}
                         </div>
                     ))}
                 </div>
@@ -64,7 +63,12 @@ function InputFile({ label, moreInfo }) {
 
 InputFile.propTypes = {
     label: PropTypes.string.isRequired,
-    moreInfo: PropTypes.string
+    moreInfo: PropTypes.string,
+    disabled: PropTypes.bool
+};
+
+InputFile.defaultProps = {
+    disabled: false
 };
 
 export default InputFile;

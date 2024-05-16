@@ -28,7 +28,7 @@ function App() {
         <Route path="/pengangkatan-anak"index element={<Lay/>} />
         <Route path="/DTKS"index element={<Lay/>} />
         <Route path="/PBI-JK"index element={<Lay/>} />
-        <Route path="/detail-pengajuan"index element={<DetailPengajuan/>} />
+        <Route path="/detail-pengajuan/:layanan"index element={<DetailPengajuan/>} />
       </Routes>
     </>
   )

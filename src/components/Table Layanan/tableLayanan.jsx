@@ -1,20 +1,22 @@
 import Table from 'react-bootstrap/Table';
 import '../Table Layanan/table.css';
-import { TiEye } from "react-icons/ti";
-import PropTypes from 'prop-types'; // Import PropTypes
+import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { NavLink } from "react-router-dom";
+import { IoEyeSharp } from "react-icons/io5";
+import { RiPencilFill } from "react-icons/ri";
+import { IoMdTrash } from "react-icons/io";
+import { MdFileDownload } from "react-icons/md";
 
-
-function TableLayanan({ data }) {
+function TableLayanan({ data, layanan }) {
     const [showEntries, setShowEntries] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
 
     const handleShowEntriesChange = (event) => {
         setShowEntries(parseInt(event.target.value));
-        setCurrentPage(1); // Reset ke halaman pertama saat jumlah entri diubah
+        setCurrentPage(1);
     };
 
     const handleNextPage = () => {
@@ -25,7 +27,6 @@ function TableLayanan({ data }) {
         setCurrentPage(currentPage - 1);
     };
 
-    // Menghitung index awal dan akhir untuk data yang ditampilkan sesuai halaman saat ini
     const startIndex = (currentPage - 1) * showEntries;
     const endIndex = startIndex + showEntries;
 
@@ -33,10 +34,10 @@ function TableLayanan({ data }) {
         <>
             <div className="row ms-1 border rounded py-3 overflow-hidden mx-auto">
                 <div className="show-entries d-flex align-items-center gap-1 mb-2">
-                    <span style={{fontSize: '.8rem'}}>Show</span>
+                    <span style={{ fontSize: '.8rem' }}>Show</span>
                     <Form.Control
                         as="select"
-                        style={{ fontSize: '.8rem', width: '10%' }}
+                        style={{ fontSize: '.8rem', width: '14%' }}
                         value={showEntries}
                         onChange={handleShowEntriesChange}
                     >
@@ -45,41 +46,70 @@ function TableLayanan({ data }) {
                         <option value={50}>50</option>
                         <option value={100}>100</option>
                     </Form.Control>
-                    <span style={{fontSize: '.8rem'}}>entries</span>
+                    <span style={{ fontSize: '.8rem' }}>entries</span>
                 </div>
-                <div className="col">
-                    <Table striped bordered hover>
+                <div className="col fixed-table-container">
+                    <Table striped bordered hover className="fixed-table">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Tanggal</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
+                                <th className='text-center col-no'>No</th>
+                                <th className="col-nopel">No. Pelayanan</th>
+                                <th className="col-tanggal">Tanggal</th>
+                                <th className="col-status">Status</th>
+                                <th className="col-aksi">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.slice(startIndex, endIndex).map((data, index) => (
+                            {data.slice(startIndex, endIndex).map((item, index) => (
                                 <tr key={index}>
-                                    <td>{data.id}</td>
-                                    <td>{data.tanggal}</td>
-                                    <td>{data.status}</td>
-                                    <td>
-                                        <NavLink to='/detail-pengajuan'>
-                                            <div className="btn btn-primary lh-1 p-1"><TiEye size={'20px'} /></div>
+                                    <td className='text-center col-no'>{startIndex + index + 1}</td>
+                                    <td className="col-nopel">{item.nopel}</td>
+                                    <td className="col-tanggal">{item.tanggal}</td>
+                                    <td className="col-status">{item.status}</td>
+                                    <td className="col-aksi">
+                                        <NavLink to={`/detail-pengajuan/${layanan}`}>
+                                            <div className="btn btn-primary lh-1 p-1 me-1">
+                                                <IoEyeSharp size={'18px'} />
+                                            </div>
                                         </NavLink>
+                                        {item.status === 'Menunggu Validasi' && (
+                                            <>
+                                                <NavLink to='#edit-pengajuan'>
+                                                    <div className="btn btn-primary lh-1 p-1 me-1">
+                                                        <RiPencilFill size={'18px'} />
+                                                    </div>
+                                                </NavLink>
+                                                <NavLink to='#hapus-pengajuan'>
+                                                    <div className="btn btn-danger lh-1 p-1 me-1">
+                                                        <IoMdTrash size={'18px'} />
+                                                    </div>
+                                                </NavLink>
+                                            </>
+                                        )}
+                                        {item.status === 'Diterima' && (
+                                            <NavLink to='#download-pengajuan'>
+                                                <div className="btn btn-success lh-1 p-1 me-1">
+                                                    <MdFileDownload size={'18px'} />
+                                                </div>
+                                            </NavLink>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </Table>
-                    <div className="d-flex justify-content-between align-items-center">
-                    <div className="showing-entries" style={{fontSize: '.85rem'}}>
-                            Showing {Math.min(startIndex + 1, data.length)} to {Math.min(endIndex, data.length)} of {data.length} entries
-                        </div>
-                        <div className="pagination d-flex gap-2">
-                            <button className="btn btn-primary" onClick={handlePrevPage} disabled={currentPage === 1} style={{fontSize: '.85rem'}}><IoIosArrowBack /></button>
-                            <button className="btn btn-primary" onClick={handleNextPage} disabled={endIndex >= data.length} style={{fontSize: '.85rem'}}><IoIosArrowForward /></button>
-                        </div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center mt-2">
+                    <div className="showing-entries" style={{ fontSize: '.85rem' }}>
+                        Showing {Math.min(startIndex + 1, data.length)} to {Math.min(endIndex, data.length)} of {data.length} entries
+                    </div>
+                    <div className="pagination d-flex gap-2">
+                        <button className="btn btn-primary" onClick={handlePrevPage} disabled={currentPage === 1} style={{ fontSize: '.85rem' }}>
+                            <IoIosArrowBack />
+                        </button>
+                        <button className="btn btn-primary" onClick={handleNextPage} disabled={endIndex >= data.length} style={{ fontSize: '.85rem' }}>
+                            <IoIosArrowForward />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -88,7 +118,8 @@ function TableLayanan({ data }) {
 }
 
 TableLayanan.propTypes = {
-    data: PropTypes.array.isRequired
+    data: PropTypes.array.isRequired,
+    layanan: PropTypes.string.isRequired
 };
 
 export default TableLayanan;
