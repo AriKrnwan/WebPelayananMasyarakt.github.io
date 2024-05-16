@@ -1,0 +1,45 @@
+.left img {
+    width: 95%;
+}
+
+.wellcome {
+    padding-top: 140px;
+}
+
+.text-bg{
+    font-size: 2.1rem;
+    background-color: #224B80;
+}
+
+.text-nonbg,
+.text-bottom {
+    font-size: 2.1rem;
+}
+
+.long-text {
+    font-size: .85rem;
+}
+
+@media (max-width: 768px) {
+    .left img {
+        width: 80%;
+    }
+
+    .wellcome {
+        padding-top: 104px;
+    }
+
+    .text-top,
+    .text-bottom
+    .long-text {
+        justify-content: center;
+    }
+
+    .long-text {
+        text-align: center;
+    }
+
+    .right {
+        margin-top: 32px !important;
+    }
+}

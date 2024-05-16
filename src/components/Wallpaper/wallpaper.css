@@ -1,0 +1,38 @@
+.wallpaper {
+    width: 100%;
+    z-index: -100;
+}
+
+.wallpaper img,
+.wp,
+.wave,
+.square {
+    width: 100%;
+}
+
+.wave {
+    margin-top: -250px;
+}
+
+.wave2 {
+    margin-top: -380px;
+}
+
+@media (max-width: 768px) {
+    .wallpaper {
+        overflow-x: hidden;
+    }
+
+    .wallpaper img {
+        height: 100%;
+        width: 240%;
+    }
+
+    .wave {
+        margin-top: -120px;
+    }
+
+    .wave2 {
+        margin-top: -260px;
+    }
+}

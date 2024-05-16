@@ -1,0 +1,46 @@
+#responsive-navbar-nav {
+    font-size: .85rem;
+    transition: 5s;
+}
+
+.navbar-brand img {
+    height: 40px;
+}
+
+.namaLogo {
+    font-size: .9rem;
+}
+
+.navbar {
+    --bs-navbar-padding-y: .7rem !important;
+    background-color: transparent !important;
+    width: 100%;
+    transition: .5s;
+}
+
+.navbar p, 
+.navbar .nav-link {
+    transition: .3s ease;
+}
+
+.navbar-toggler {
+    color: white !important;
+}
+
+.scrolled {
+    background-color: white !important;
+    --bs-navbar-padding-y: .9rem !important;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        background-color: white !important;
+        --bs-navbar-padding-y: .7rem !important;
+    }
+
+    .navbar p,
+    .navbar .nav-link {
+        color: black !important;
+    }
+}

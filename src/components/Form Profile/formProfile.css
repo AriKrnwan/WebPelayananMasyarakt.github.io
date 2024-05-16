@@ -1,0 +1,8 @@
+.wrap-prof {
+    padding-top: 200px;
+}
+
+.input-field input::placeholder {
+    font-size: .9rem;
+    color: #bdbdbd;
+}

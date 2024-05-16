@@ -1,0 +1,11 @@
+th {
+    font-size: .85rem;
+    font-weight: 600;
+    padding: 10px !important;
+}
+
+td {
+    font-size: .85rem;
+    font-weight: 400;
+    padding: 10px !important;
+}

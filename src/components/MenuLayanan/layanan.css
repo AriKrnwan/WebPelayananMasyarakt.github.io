@@ -1,0 +1,19 @@
+.text-layanan {
+    margin-top: 200px;
+}
+
+.ilustration {
+    height: 100px;
+}
+
+.ilustration img {
+    height: 100%;
+}
+
+.title p {
+    font-size: .8rem;
+}
+
+#card-layanan .card{
+    height: 232px;
+}
