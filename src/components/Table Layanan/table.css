@@ -43,3 +43,9 @@ td {
 .col-aksi {
     width: 200px;
 }
+
+@media (max-width: 768px) {
+    .custom-entries {
+        width: 20%;
+    }
+}

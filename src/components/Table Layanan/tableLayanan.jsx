@@ -36,9 +36,9 @@ function TableLayanan({ data, layanan }) {
                 <div className="show-entries d-flex align-items-center gap-1 mb-2">
                     <span style={{ fontSize: '.8rem' }}>Show</span>
                     <Form.Control
-                        className='px-1'
+                        className='custom-entries px-1 text-center'
                         as="select"
-                        style={{ fontSize: '.8rem', width: '14%' }}
+                        style={{ fontSize: '.8rem', width: '6%' }}
                         value={showEntries}
                         onChange={handleShowEntriesChange}
                     >
