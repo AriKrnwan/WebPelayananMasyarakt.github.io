@@ -1,28 +1,37 @@
 import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
+import PropTypes from 'prop-types';
 
-function FormSKT() {
+function FormSKT({ disabled, showAlert }) {
     return (
         <>
-            <div className="row border rounded py-3 mx-1">
-                <div className="mb-3">
-                    <AlertLayanan/>
-                </div>
-                <InputFile label='Surat Permohonan Pengajuan Pendaftaran LKS' moreInfo='Lembaga Kesejahteraan Sosial (LKS)' />
-                <InputFile label='Akta Notaris Pendirian' moreInfo='yang disahkan oleh Menteri Hukum dan HAM' />
-                <InputFile label='Anggaran Dasar dan Anggaran Rumah Tangga' />
-                <InputFile label='Struktur Organisasi Lembaga' />
-                <InputFile label='Surat Keteranagan Domisili' moreInfo='dari Kelurahan Setempat' />
-                <InputFile label='Biodata Pengurus dan Anggota' moreInfo='nama, alamat, dan telepon' />
-                <InputFile label='Program Kerja untuk pelaksanaan kegiatan' />
-                <InputFile label='NPWP Yayasan/Lembaga/Organisasi' />
-                <div className="mt-3">
-                    <div className="btn btn-primary w-100">Kirim</div>
-                </div>
+            <div className="mb-3">
+                <AlertLayanan showAlert={showAlert} />
+            </div>
+            <InputFile label='Surat Permohonan Pengajuan Pendaftaran LKS' moreInfo='Lembaga Kesejahteraan Sosial (LKS)' disabled={disabled} />
+            <InputFile label='Akta Notaris Pendirian' moreInfo='yang disahkan oleh Menteri Hukum dan HAM' disabled={disabled} />
+            <InputFile label='Anggaran Dasar dan Anggaran Rumah Tangga' disabled={disabled} />
+            <InputFile label='Struktur Organisasi Lembaga' disabled={disabled} />
+            <InputFile label='Surat Keteranagan Domisili' moreInfo='dari Kelurahan Setempat' disabled={disabled} />
+            <InputFile label='Biodata Pengurus dan Anggota' moreInfo='nama, alamat, dan telepon' disabled={disabled} />
+            <InputFile label='Program Kerja untuk pelaksanaan kegiatan' disabled={disabled} />
+            <InputFile label='NPWP Yayasan/Lembaga/Organisasi' disabled={disabled} />
+            <div className="mt-3">
+                <div className="btn btn-primary w-100">Kirim</div>
             </div>
         </>
     )
 }
+
+FormSKT.propTypes = {
+    disabled: PropTypes.bool,
+    showAlert: PropTypes.bool
+};
+
+FormSKT.defaultProps = {
+    disabled: false,
+    showAlert: true
+};
 
 export default FormSKT
 

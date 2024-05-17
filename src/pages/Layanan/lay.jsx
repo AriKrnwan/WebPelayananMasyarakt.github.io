@@ -143,13 +143,15 @@ function Lay() {
                             <SidebarLay activeTab={activeTab} handleTabClick={handleTabClick} />
                         </div>
                         <div className="col-lg-9 mx-auto">
-                            {activeTab === 'Pengajuan' ? (
-                                renderForm()
-                            ) : activeTab === 'Proses' ? (
-                                <TableLayanan data={dataProses} layanan={getLayananName()} />
-                            ) : (
-                                <TableLayanan data={dataSelesai} layanan={getLayananName()} />
-                            )}
+                            <div className="row border rounded py-3 mx-1">
+                                {activeTab === 'Pengajuan' ? (
+                                    renderForm()
+                                ) : activeTab === 'Proses' ? (
+                                    <TableLayanan data={dataProses} layanan={getLayananName()} />
+                                ) : (
+                                    <TableLayanan data={dataSelesai} layanan={getLayananName()} />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

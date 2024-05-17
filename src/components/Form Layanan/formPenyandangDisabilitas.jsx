@@ -1,23 +1,32 @@
 import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
+import PropTypes from 'prop-types';
 
-function FormPenyandangDisabilitas() {
+function FormPenyandangDisabilitas({ disabled, showAlert }) {
     return (
         <>
-            <div className="row border rounded py-3 mx-1">
-                <div className="mb-3">
-                    <AlertLayanan/>
-                </div>
-                <InputFile label='Akta Kelahiran/Kartu Identitas Anak(KIA)/KTP' />
-                <InputFile label='Kartu Keluarga (KK)' />
-                <InputFile label='BPJS KIS' />
-                <div className="mt-3">
-                    <div className="btn btn-primary w-100">Kirim</div>
-                </div>
+            <div className="mb-3">
+                <AlertLayanan showAlert={showAlert} />
+            </div>
+            <InputFile label='Akta Kelahiran/Kartu Identitas Anak(KIA)/KTP' disabled={disabled} />
+            <InputFile label='Kartu Keluarga (KK)' disabled={disabled} />
+            <InputFile label='BPJS KIS' disabled={disabled} />
+            <div className="mt-3">
+                <div className="btn btn-primary w-100">Kirim</div>
             </div>
         </>
     )
 }
+
+FormPenyandangDisabilitas.propTypes = {
+    disabled: PropTypes.bool,
+    showAlert: PropTypes.bool
+};
+
+FormPenyandangDisabilitas.defaultProps = {
+    disabled: false,
+    showAlert: true
+};
 
 export default FormPenyandangDisabilitas
 

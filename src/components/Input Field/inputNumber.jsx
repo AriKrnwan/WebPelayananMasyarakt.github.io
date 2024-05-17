@@ -6,7 +6,7 @@ function InputNumber({ label, placeholder, disabled }) {
         <>
             <div className="input-field col-lg-6 py-2">
                 <Form.Label className='ubuntu-sans-medium' style={{fontSize: '.85rem'}}>{label}</Form.Label>
-                <Form.Control disabled={disabled} type="number" placeholder={placeholder} style={{fontSize: '.9rem'}} required />
+                <Form.Control disabled={disabled} type="number" placeholder={placeholder} style={{fontSize: '.85rem'}} required />
             </div>
         </>
     )

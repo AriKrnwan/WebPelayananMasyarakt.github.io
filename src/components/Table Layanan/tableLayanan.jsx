@@ -32,7 +32,7 @@ function TableLayanan({ data, layanan }) {
 
     return (
         <>
-            <div className="row ms-1 border rounded py-3 overflow-hidden mx-auto">
+            <div className="row mx-auto py-3 overflow-hidden mx-auto">
                 <div className="show-entries d-flex align-items-center gap-1 mb-2">
                     <span style={{ fontSize: '.8rem' }}>Show</span>
                     <Form.Control
@@ -67,11 +67,6 @@ function TableLayanan({ data, layanan }) {
                                     <td className="col-tanggal">{item.tanggal}</td>
                                     <td className="col-status">{item.status}</td>
                                     <td className="col-aksi">
-                                        <NavLink to={`/detail-pengajuan/${layanan}`}>
-                                            <div className="btn btn-primary lh-1 p-1 me-1">
-                                                <IoEyeSharp size={'18px'} />
-                                            </div>
-                                        </NavLink>
                                         {item.status === 'Menunggu Validasi' && (
                                             <>
                                                 <NavLink to='#edit-pengajuan'>
@@ -86,14 +81,29 @@ function TableLayanan({ data, layanan }) {
                                                 </NavLink>
                                             </>
                                         )}
-                                        {item.status === 'Diterima' && (
-                                            <NavLink to='#download-pengajuan'>
-                                                <div className="btn btn-success lh-1 p-1 me-1">
-                                                    <MdFileDownload size={'18px'} />
+                                        {(item.status === 'Berkas Diproses' || item.status === 'Ditolak') && (
+                                            <NavLink to={`/detail-pengajuan/${layanan}`}>
+                                                <div className="btn btn-primary lh-1 p-1 me-1">
+                                                    <IoEyeSharp size={'18px'} />
                                                 </div>
                                             </NavLink>
                                         )}
+                                        {item.status === 'Diterima' && (
+                                            <>
+                                                <NavLink to={`/detail-pengajuan/${layanan}`}>
+                                                    <div className="btn btn-primary lh-1 p-1 me-1">
+                                                        <IoEyeSharp size={'18px'} />
+                                                    </div>
+                                                </NavLink>
+                                                <NavLink to='#download-pengajuan'>
+                                                    <div className="btn btn-success lh-1 p-1 me-1">
+                                                        <MdFileDownload size={'18px'} />
+                                                    </div>
+                                                </NavLink>
+                                            </>
+                                        )}
                                     </td>
+
                                 </tr>
                             ))}
                         </tbody>
