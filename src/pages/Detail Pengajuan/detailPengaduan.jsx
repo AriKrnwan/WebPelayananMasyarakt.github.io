@@ -4,8 +4,12 @@ import InputField from '../../components/Input Field/inputField';
 import TextArea from '../../components/Input Field/textArea';
 import Footer from '../../components/Footer/footer';
 import FormPengaduan from '../../components/Form Layanan/formPengaduan';
+import { useEffect } from 'react';
 
 function DetailPengaduan() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     return (
         <>
