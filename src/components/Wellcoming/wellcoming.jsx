@@ -20,7 +20,7 @@ function Wellcoming() {
                     </div>
                     <div className="custom-platform-text text-bottom ubuntu-sans-semibold text-white">Platform Pelayanan Publik</div>
                 </div>
-                <div className="long-text ubuntu-sans-medium text-white">Kami siap memberikan pelayanan yang cekatan, amanah, informatif, dan ramah. Kami hadir untuk memudahkan Anda dengan layanan yang handal dan penuh kepedulian.</div>
+                <div className="long-text ubuntu-sans-regular text-white">Kami siap memberikan pelayanan yang cekatan, amanah, informatif, dan ramah. Kami hadir untuk memudahkan Anda dengan layanan yang handal dan penuh kepedulian.</div>
             </div>
         </div>
         </>
