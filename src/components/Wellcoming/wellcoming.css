@@ -42,4 +42,8 @@
     .right {
         margin-top: 32px !important;
     }
+
+    .custom-platform-text {
+        text-align: center;
+    }
 }
