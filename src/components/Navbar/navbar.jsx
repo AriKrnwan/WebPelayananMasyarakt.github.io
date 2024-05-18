@@ -35,10 +35,10 @@ function CollapsibleExample() {
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Navbar.Collapse className='flex-grow-0' id="responsive-navbar-nav">
             <Nav>
-                <NavLink to="/home" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Beranda</NavLink>
-                <NavLink to="/profile" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Profile</NavLink>
-                <NavLink to="/notifikasi" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Notifikasi</NavLink>
-                <NavLink to="/login" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Logout</NavLink>
+                <NavLink to="/home" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Beranda</NavLink>
+                <NavLink to="/profile" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Profile</NavLink>
+                <NavLink to="/notifikasi" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Notifikasi</NavLink>
+                <NavLink to="/login" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Logout</NavLink>
             </Nav>
             </Navbar.Collapse>
         </Container>

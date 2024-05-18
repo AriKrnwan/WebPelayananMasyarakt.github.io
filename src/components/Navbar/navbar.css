@@ -37,10 +37,15 @@
     .navbar {
         background-color: white !important;
         --bs-navbar-padding-y: .7rem !important;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
     }
 
     .navbar p,
-    .navbar .nav-link {
+    .navbar-nav a {
         color: black !important;
+    }
+
+    .navbar-nav a {
+        margin: 6px 0;
     }
 }

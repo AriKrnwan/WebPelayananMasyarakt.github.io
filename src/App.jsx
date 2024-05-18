@@ -7,6 +7,7 @@ import Lay from './pages/Layanan/lay.jsx';
 import DetailPengajuan from './pages/Detail Pengajuan/detailPengajuan.jsx';
 import Pengaduan from './pages/Pengaduan/pengaduan.jsx';
 import DetailPengaduan from './pages/Detail Pengajuan/detailPengaduan.jsx';
+import Register from './pages/Login/register.jsx';
 
 function App() {
 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/pengaduan-DSPM"index element={<Pengaduan/>} />
         <Route path="/detail-pengajuan/:layanan"index element={<DetailPengajuan/>} />
         <Route path="/detail-pengaduan"index element={<DetailPengaduan/>} />
+        <Route path="/register"index element={<Register/>} />
       </Routes>
     </>
   )
