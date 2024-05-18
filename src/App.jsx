@@ -5,6 +5,8 @@ import Notifikasi from './pages/Notifikasi/notifikasi.jsx'
 import Login from './pages/Login/login.jsx'
 import Lay from './pages/Layanan/lay.jsx';
 import DetailPengajuan from './pages/Detail Pengajuan/detailPengajuan.jsx';
+import Pengaduan from './pages/Pengaduan/pengaduan.jsx';
+import DetailPengaduan from './pages/Detail Pengajuan/detailPengaduan.jsx';
 
 function App() {
 
@@ -28,7 +30,9 @@ function App() {
         <Route path="/pengangkatan-anak"index element={<Lay/>} />
         <Route path="/DTKS"index element={<Lay/>} />
         <Route path="/PBI-JK"index element={<Lay/>} />
+        <Route path="/pengaduan-DSPM"index element={<Pengaduan/>} />
         <Route path="/detail-pengajuan/:layanan"index element={<DetailPengajuan/>} />
+        <Route path="/detail-pengaduan"index element={<DetailPengaduan/>} />
       </Routes>
     </>
   )

@@ -22,8 +22,8 @@ function InputFile({ label, moreInfo, disabled }) {
     return (
         <>
             <div className="input-field col-lg-6 py-2 mb-2">
-                <div className="label-more mb-1 d-flex align-items-center justify-content-between position-relative">
-                    <Form.Label className='ubuntu-sans-medium mb-1' style={{fontSize: '.85rem'}}>{label}</Form.Label>
+                <div className="label-more mb-1 d-flex align-items-center justify-content-between position-relative lh-1">
+                    <Form.Label className='ubuntu-sans-medium my-1' style={{fontSize: '.85rem'}}>{label}</Form.Label>
                     {moreInfo && (
                         <BsQuestionCircleFill size={'14px'} color='#bdbdbd' className="m-0 overflow-hidden"
                             onMouseEnter={() => setIsHovered(true)}

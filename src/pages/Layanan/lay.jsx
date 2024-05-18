@@ -18,6 +18,7 @@ import FormPenyandangDisabilitas from '../../components/Form Layanan/formPenyand
 import FormPengangkatanAnak from '../../components/Form Layanan/formPengakatanAnak.jsx';
 import FormPBIJK from '../../components/Form Layanan/formPBIJK.jsx';
 import FormDTKS from '../../components/Form Layanan/formDTKS.jsx';
+import FormPengaduan from '../../components/Form Layanan/formPengaduan.jsx';
 
 function Lay() {
     const [activeTab, setActiveTab] = useState('Pengajuan');
@@ -58,6 +59,8 @@ function Lay() {
                 return <FormPBIJK />;
             case '/DTKS':
                 return <FormDTKS />;
+            case '/pengaduan-DSPM':
+                return <FormPengaduan />;
             default:
                 return null;
         }

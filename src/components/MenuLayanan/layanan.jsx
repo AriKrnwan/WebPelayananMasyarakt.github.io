@@ -12,6 +12,7 @@ import ilsLay9 from "../../assets/images/Ilustrasi Layanan/9Penyandang Disabilit
 import ilsLay10 from "../../assets/images/Ilustrasi Layanan/10Pengangkatan Anak.svg"
 import ilsLay11 from "../../assets/images/Ilustrasi Layanan/11DTKS.svg"
 import ilsLay12 from "../../assets/images/Ilustrasi Layanan/12PBI-JK.svg"
+import ilsLay13 from "../../assets/images/Ilustrasi Layanan/pengaduan.svg"
 
 function Layanan() {
     const cardData = [
@@ -27,6 +28,7 @@ function Layanan() {
         { image: ilsLay10, title: "Pelayanan Penertiban Rekomendasi Usulan Calon Pengangkatan Anak", to: "/pengangkatan-anak" },
         { image: ilsLay11, title: "Pelayanan Surat Keterangan Data Terpadu Kesejahteraan Sosial (DTKS)", to: "/DTKS" },
         { image: ilsLay12, title: "Pelayanan Penanganan Pengaduan Penerima Bantuan Iuran Jaminan Kesehatan (PBI-JK)", to: "/PBI-JK" },
+        { image: ilsLay13, title: "Pengaduan DSPM", to: "/pengaduan-DSPM" },
     ];
 
     return (

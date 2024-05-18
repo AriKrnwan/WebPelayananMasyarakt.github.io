@@ -99,7 +99,7 @@ function DetailPengajuan() {
                             <TextArea label='Alamat' disabled />
                             <InputField label='Email' disabled />
                             <InputField label='No Telepon' disabled />
-                            <h6 className='mt-5'>Data Berkas</h6>
+                            <h6 className='mt-4'>Data Berkas</h6>
                             {renderForm()}
                         </div>
                     </div>
