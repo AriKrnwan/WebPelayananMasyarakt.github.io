@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormSantunanKematian({ disabled, showAlert }) {
+function FormSantunanKematian({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='Surat Permohonan Santunan Kematian' moreInfo='yang dibuat oleh pemohon' disabled={disabled} />
             <InputFile label='Surat Keterangan Ahli Waris' moreInfo='di tanda tangani oleh ahli waris dengan materai Rp. 10.000,-serta diketahui oleh Lurah dan Ketua RT setempat (asli) dan difotocopy serta dilegalisir oleh pihak kelurahan sebanyak 1lembar' disabled={disabled} />
             <InputFile label='Surat Keterangan Tidak Mampu (SKTM)' moreInfo='atas nama almarhum yang ditanda tangani oleh oleh lurahsetempat dan difotocopy 1 lembar' disabled={disabled} />

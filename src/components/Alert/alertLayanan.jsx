@@ -1,7 +1,7 @@
 import { FaCircleInfo } from "react-icons/fa6";
 import PropTypes from 'prop-types';
 
-function AlertLayanan({ showAlert }) {
+function AlertLayanan({ showAlert, desc }) {
     if (!showAlert) return null;
 
     return (
@@ -11,14 +11,15 @@ function AlertLayanan({ showAlert }) {
             </div>
             <div className="text-alert">
                 <p className="ubuntu-sans-medium text-white mb-1" style={{ fontSize: '.85rem' }}>Info</p>
-                <p className="ubuntu-sans-light text-white" style={{ fontSize: '.85rem' }}>Berkas yang diunggah akan diproses saat hari dan jam kerja berlangsung.</p>
+                <p className="ubuntu-sans-light text-white" style={{ fontSize: '.85rem' }}>{desc}</p>
             </div>
         </div>
     );
 }
 
 AlertLayanan.propTypes = {
-    showAlert: PropTypes.bool
+    showAlert: PropTypes.bool,
+    desc: PropTypes.string.isRequired
 };
 
 AlertLayanan.defaultProps = {

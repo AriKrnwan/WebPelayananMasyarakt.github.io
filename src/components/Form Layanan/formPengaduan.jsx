@@ -1,14 +1,10 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 import TextArea from "../Input Field/textArea";
 
-function FormPengaduan({ disabled, showAlert }) {
+function FormPengaduan({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <TextArea label="Permasalahan yang Diadukan" placeholder="Tulis Permasalahan" disabled={disabled} />
             <TextArea label="Harapan" placeholder="Tulis Harapan" disabled={disabled} />
             <InputFile label='Upload foto/gambar' disabled={disabled} />

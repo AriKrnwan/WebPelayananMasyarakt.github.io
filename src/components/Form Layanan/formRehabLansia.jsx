@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormRehabLansia({ disabled, showAlert }) {
+function FormRehabLansia({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='Fotocopy KTP' disabled={disabled} />
             <InputFile label='Fotocopy KK' disabled={disabled} />
             <div className="mt-3">

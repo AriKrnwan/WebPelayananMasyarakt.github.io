@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form';
 import PropTypes from 'prop-types';
 import { IoMdEye, IoIosEyeOff } from "react-icons/io";
 
-function PasswordLog({ label, placeholder, disabled }) {
+function PasswordLog({ label, placeholder, disabled, value, onChange, name }) {
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -22,6 +22,9 @@ function PasswordLog({ label, placeholder, disabled }) {
                             placeholder={placeholder} 
                             style={{fontSize: '.85rem'}} 
                             className='border-0'
+                            value={value}
+                            onChange={onChange}
+                            name={name} 
                             required 
                         />
                         {showPassword ? (
@@ -39,7 +42,10 @@ function PasswordLog({ label, placeholder, disabled }) {
 PasswordLog.propTypes = {
     label: PropTypes.string.isRequired,
     placeholder: PropTypes.string.isRequired,
-    disabled: PropTypes.bool
+    disabled: PropTypes.bool,
+    value: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
+    name: PropTypes.string.isRequired, 
 };
 
 PasswordLog.defaultProps = {

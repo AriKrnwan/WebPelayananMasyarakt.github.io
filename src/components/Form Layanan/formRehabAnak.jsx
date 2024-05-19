@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormRehabAnak({ disabled, showAlert }) {
+function FormRehabAnak({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='Identitas Kota Bontang' disabled={disabled} />
             <InputFile label='Surat Keterangan dari Kelurahan/Stakeholder' disabled={disabled} />
             <InputFile label='Identitas Pelapor' disabled={disabled} />

@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormPUB({ disabled, showAlert }) {
+function FormPUB({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='Surat Keterangan Terdaftar bagi Ormas' moreInfo='dari Kementrian Hukum dan HAM' disabled={disabled} />
             <InputFile label='Surat Keterangan Terdaftar bagi LKS' moreInfo='dari Dinas Sosial' disabled={disabled} />
             <InputFile label='NPWP Lembaga' disabled={disabled} />

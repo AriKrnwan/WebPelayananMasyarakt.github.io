@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormDTKS({ disabled, showAlert }) {
+function FormDTKS({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='KTP Domisili Bontang' disabled={disabled} />
             <InputFile label='KK Domisili Bontang' disabled={disabled} />
             <div className="mt-3">

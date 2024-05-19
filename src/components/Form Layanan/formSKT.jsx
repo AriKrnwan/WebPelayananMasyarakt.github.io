@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormSKT({ disabled, showAlert }) {
+function FormSKT({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='Surat Permohonan Pengajuan Pendaftaran LKS' moreInfo='Lembaga Kesejahteraan Sosial (LKS)' disabled={disabled} />
             <InputFile label='Akta Notaris Pendirian' moreInfo='yang disahkan oleh Menteri Hukum dan HAM' disabled={disabled} />
             <InputFile label='Anggaran Dasar dan Anggaran Rumah Tangga' disabled={disabled} />

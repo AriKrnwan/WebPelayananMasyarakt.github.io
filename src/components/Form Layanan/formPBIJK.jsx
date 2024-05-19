@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormPBIJK({ disabled, showAlert }) {
+function FormPBIJK({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='KTP/KK Domisili Bontang' disabled={disabled} />
             <InputFile label='Surat Keterangan Rawat Inap' disabled={disabled} />
             <div className="mt-3">

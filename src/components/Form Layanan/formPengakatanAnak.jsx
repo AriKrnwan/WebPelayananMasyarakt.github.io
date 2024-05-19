@@ -1,13 +1,9 @@
-import AlertLayanan from "../../components/Alert/alertLayanan";
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 
-function FormPengangkatanAnak({ disabled, showAlert }) {
+function FormPengangkatanAnak({ disabled }) {
     return (
         <>
-            <div className="mb-3">
-                <AlertLayanan showAlert={showAlert} />
-            </div>
             <InputFile label='Surat Keterangan Fisik dan Kejiwaan' disabled={disabled} />
             <InputFile label='Surat Keterangan Bebas Narkoba' disabled={disabled} />
             <InputFile label='SKCK' moreInfo='Bukti berkelakuan baik' disabled={disabled} />

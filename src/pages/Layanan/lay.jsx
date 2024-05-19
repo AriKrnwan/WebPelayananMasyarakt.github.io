@@ -19,6 +19,7 @@ import FormPengangkatanAnak from '../../components/Form Layanan/formPengakatanAn
 import FormPBIJK from '../../components/Form Layanan/formPBIJK.jsx';
 import FormDTKS from '../../components/Form Layanan/formDTKS.jsx';
 import FormPengaduan from '../../components/Form Layanan/formPengaduan.jsx';
+import AlertLayanan from '../../components/Alert/alertLayanan.jsx';
 
 function Lay() {
     const [activeTab, setActiveTab] = useState('Pengajuan');
@@ -148,7 +149,13 @@ function Lay() {
                         <div className="col-lg-9 mx-auto">
                             <div className="row border rounded py-3 mx-1">
                                 {activeTab === 'Pengajuan' ? (
-                                    renderForm()
+                                    <>
+                                        <div className="mb-3">
+                                            <AlertLayanan desc="Berkas yang diunggah akan diproses saat hari dan jam kerja berlangsung." />
+                                        </div>
+                                        {renderForm()}
+                                    </>
+                                    
                                 ) : activeTab === 'Proses' ? (
                                     <TableLayanan data={dataProses} layanan={getLayananName()} />
                                 ) : (
