@@ -3,20 +3,20 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/home.jsx';
 import Profile from './pages/Profile/profile.jsx';
 import Notifikasi from './pages/Notifikasi/notifikasi.jsx';
-import Login from './pages/Login/login.jsx';
+// import Login from './pages/Login/login.jsx';
 import Lay from './pages/Layanan/lay.jsx';
 import EditPengajuan from './pages/Detail Pengajuan/editPengajuan.jsx';
 import Pengaduan from './pages/Pengaduan/pengaduan.jsx';
 import DetailPengaduan from './pages/Detail Pengajuan/detailPengaduan.jsx';
-import Register from './pages/Login/register.jsx';
+// import Register from './pages/Login/register.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 function App() {
   return (
     <Routes>
       <Route path="/home" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* <Route path="/login" element={<Login />} /> */}
+      {/* <Route path="/register" element={<Register />} /> */}
       <Route path="/bantuan-logistik" element={<Lay />} />
       {/* <Route path="/home" element={<ProtectedRoute element={Home} />} /> */}
       <Route path="/profile" element={<ProtectedRoute element={Profile} />} />
