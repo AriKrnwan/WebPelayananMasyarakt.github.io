@@ -1,11 +1,9 @@
 import { useParams } from 'react-router-dom';
-import FormBantuanLogistik from '../../components/Form Layanan/formBantuanLogistik';
-import FormSantunanKematian from '../../components/Form Layanan/formSantunanKematian';
-import CollapsibleExample from '../../components/Navbar/navbar';
-import Wallpaper2 from '../../components/Wallpaper/wallpaper2';
-import InputField from '../../components/Input Field/inputField';
-import TextArea from '../../components/Input Field/textArea';
-import Footer from '../../components/Footer/footer';
+import FormBantuanLogistik from '../../components/Form Layanan/formBantuanLogistik.jsx';
+import FormSantunanKematian from '../../components/Form Layanan/formSantunanKematian.jsx';
+import CollapsibleExample from '../../components/Navbar/navbar.jsx';
+import Wallpaper2 from '../../components/Wallpaper/wallpaper2.jsx';
+import Footer from '../../components/Footer/footer.jsx';
 import FormSKT from '../../components/Form Layanan/formSKT.jsx';
 import FormSIO from '../../components/Form Layanan/formSIO.jsx';
 import FormPUB from '../../components/Form Layanan/formPUB.jsx';
@@ -16,44 +14,56 @@ import FormPenyandangDisabilitas from '../../components/Form Layanan/formPenyand
 import FormPengangkatanAnak from '../../components/Form Layanan/formPengakatanAnak.jsx';
 import FormPBIJK from '../../components/Form Layanan/formPBIJK.jsx';
 import FormDTKS from '../../components/Form Layanan/formDTKS.jsx';
+import AlertLayanan from '../../components/Alert/alertLayanan.jsx';
+import { useEffect, useState } from 'react';
 
-function DetailPengajuan() {
+function EditPengajuan() {
     const { layanan } = useParams();
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+        // Ambil data dari localStorage
+        const selectedData = localStorage.getItem('selectedPengajuan');
+        console.log('Data yang diambil dari localStorage:', selectedData);
+        if (selectedData) {
+            setData(JSON.parse(selectedData));
+        }
+    }, []);
 
     const renderForm = () => {
         switch (layanan) {
             case 'bantuan-logistik':
-                return <FormBantuanLogistik disabled showAlert={false} showButton={false} />;
+                return <FormBantuanLogistik />;
             case 'santunan-kematian':
-                return <FormSantunanKematian disabled showAlert={false} showButton={false} />;
+                return <FormSantunanKematian />;
             case '/SKT':
-                return <FormSKT disabled showAlert={false} showButton={false} />;
+                return <FormSKT />;
             case '/SIO':
-                return <FormSIO disabled showAlert={false} showButton={false} />;
+                return <FormSIO />;
             case '/pengumpulan-uang-dan-barang':
-                return <FormPUB disabled showAlert={false} showButton={false} />;
+                return <FormPUB />;
             case '/rehabilitasi-lansia':
-                return <FormRehabLansia disabled showAlert={false} showButton={false} />;
+                return <FormRehabLansia />;
             case '/rumah-singgah':
-                return <FormRumahSinggah disabled showAlert={false} showButton={false} />;
+                return <FormRumahSinggah />;
             case '/rehabilitasi-anak-terlantar':
-                return <FormRehabAnak disabled showAlert={false} showButton={false} />;
+                return <FormRehabAnak />;
             case '/penyandang-disabilitas':
-                return <FormPenyandangDisabilitas disabled showAlert={false} showButton={false} />;
+                return <FormPenyandangDisabilitas />;
             case '/pengangkatan-anak':
-                return <FormPengangkatanAnak disabled showAlert={false} showButton={false} />;
+                return <FormPengangkatanAnak />;
             case '/PBI-JK':
-                return <FormPBIJK disabled showAlert={false} showButton={false} />;
+                return <FormPBIJK />;
             case '/DTKS':
-                return <FormDTKS disabled showAlert={false} showButton={false} />;
+                return <FormDTKS />;
             default:
                 return null;
         }
     };
 
     const getTitle = () => {
-        switch (location.pathname) {
-            case '/detail-pengajuan/bantuan-logistik':
+        switch (layanan) {
+            case 'bantuan-logistik':
                 return 'Pelayanan Bantuan Logistik Korban Bencana';
             case '/detail-pengajuan/santunan-kematian':
                 return 'Pelayanan Pemberian Santunan Kematian';
@@ -93,13 +103,9 @@ function DetailPengajuan() {
                     <div className="form-profile row rounded border p-4 g-1 g-lg-2" style={{ backgroundColor: 'white' }}>
                         <h4 className='text-center ubuntu-sans-medium mb-3'>{getTitle()}</h4>
                         <div className="row border rounded py-4 mx-auto">
-                            <h6>Data Diri</h6>
-                            <InputField label='NIK' disabled />
-                            <InputField label='Nama' disabled />
-                            <TextArea label='Alamat' disabled />
-                            <InputField label='Email' disabled />
-                            <InputField label='No Telepon' disabled />
-                            <h6 className='mt-4'>Data Berkas</h6>
+                            <div className="mb-3">
+                                <AlertLayanan desc="Berkas yang diunggah akan diproses saat hari dan jam kerja berlangsung." showAlert />
+                            </div>
                             {renderForm()}
                         </div>
                     </div>
@@ -110,4 +116,4 @@ function DetailPengajuan() {
     );
 }
 
-export default DetailPengajuan;
+export default EditPengajuan;

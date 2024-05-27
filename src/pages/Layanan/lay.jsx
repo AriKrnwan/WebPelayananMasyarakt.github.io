@@ -6,8 +6,6 @@ import Wallpaper2 from "../../components/Wallpaper/wallpaper2";
 import '../../components/Form Layanan/formLayanan.css';
 import TableLayanan from "../../components/Table Layanan/tableLayanan.jsx";
 import SidebarLay from "../../components/Sidebar/sidebarLay.jsx";
-import FormBantuanLogistik from '../../components/Form Layanan/formBantuanLogistik.jsx';
-import FormSantunanKematian from '../../components/Form Layanan/formSantunanKematian.jsx';
 import FormSKT from '../../components/Form Layanan/formSKT.jsx';
 import FormSIO from '../../components/Form Layanan/formSIO.jsx';
 import FormPUB from '../../components/Form Layanan/formPUB.jsx';
@@ -20,9 +18,14 @@ import FormPBIJK from '../../components/Form Layanan/formPBIJK.jsx';
 import FormDTKS from '../../components/Form Layanan/formDTKS.jsx';
 import FormPengaduan from '../../components/Form Layanan/formPengaduan.jsx';
 import AlertLayanan from '../../components/Alert/alertLayanan.jsx';
+import SubmitBantuanLogistik from '../../components/Form Submit/submitBantuanLogistik.jsx';
+import api from '../../components/api.jsx';
+import SubmitSantunanKematian from '../../components/Form Submit/submitSantunanKematian.jsx';
 
 function Lay() {
     const [activeTab, setActiveTab] = useState('Pengajuan');
+    const [dataProses, setDataProses] = useState([]);
+    const [dataSelesai, setDataSelesai] = useState([]);
     const location = useLocation();
 
     const handleTabClick = (tab) => {
@@ -37,9 +40,9 @@ function Lay() {
     const renderForm = () => {
         switch (location.pathname) {
             case '/bantuan-logistik':
-                return <FormBantuanLogistik />;
+                return <SubmitBantuanLogistik />;
             case '/santunan-kematian':
-                return <FormSantunanKematian />;
+                return <SubmitSantunanKematian />;
             case '/SKT':
                 return <FormSKT />;
             case '/SIO':
@@ -100,38 +103,62 @@ function Lay() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [location.pathname]);
 
-    const getDummyData = () => {
-        switch (location.pathname) {
-            case '/bantuan-logistik':
-                return [
-                    { nopel: 'BLG000001', tanggal: '2024-05-12', status: 'Menunggu Validasi' },
-                    { nopel: 'BLG000002', tanggal: '2024-05-13', status: 'Berkas Diproses' },
-                    { nopel: 'BLG000003', tanggal: '2024-05-14', status: 'Ditolak' },
-                    { nopel: 'BLG000004', tanggal: '2024-05-14', status: 'Diterima' }
-                ];
-            case '/santunan-kematian':
-                return [
-                    { tanggal: '2024-05-12', status: 'Menunggu Validasi' },
-                    { tanggal: '2024-05-13', status: 'Berkas Diproses' },
-                    { tanggal: '2024-05-14', status: 'Ditolak' },
-                    { tanggal: '2024-05-15', status: 'Diterima' }
-                ];
-            // Tambahkan kasus untuk path lainnya dan data dummy yang sesuai di sini
-            default:
-                return [];
+        // Get user data from local storage
+        const userData = JSON.parse(localStorage.getItem('user'));
+
+        if (!userData) {
+            // Redirect to login page or show an alert
+            console.error('User not logged in');
+            return;
         }
-    };
 
-    const filterDataByStatus = (status) => {
-        const data = getDummyData();
-        const filteredData = data.filter(item => status.includes(item.status));
-        return filteredData.map((item, index) => ({ ...item, id: index + 1 }));
-    };
+        const fetchData = (endpoint) => {
+            api.get(endpoint, {
+                params: { user_id: userData.id },
+                headers: { Authorization: `Bearer ${userData.token}` }
+            })
+            .then(response => {
+                console.log('Data dari backend:', response.data);
+                const fetchedData = response.data.map(item => {
+                    // Tentukan status berdasarkan nilai kolom-kolom di database
+                    let status;
+                    if (item.submit_at && !item.valid_at && !item.reject_at && !item.accept_at) {
+                        status = 'Menunggu Validasi';
+                    } else if (item.submit_at && item.valid_at && !item.reject_at && !item.accept_at) {
+                        status = 'Berkas Diproses';
+                    } else if (item.submit_at && item.valid_at && item.reject_at && !item.accept_at) {
+                        status = 'Ditolak';
+                    } else if (item.submit_at && item.valid_at && !item.reject_at && item.accept_at) {
+                        status = 'Diterima';
+                    } else if (item.submit_at && !item.valid_at && item.reject_at && !item.accept_at){
+                        status = 'Berkas Tidak Valid'; // Handle jika kondisi tidak sesuai
+                    } else {
+                        status = 'Status tidak valid'; // Handle jika kondisi tidak sesuai
+                    }
 
-    const dataProses = filterDataByStatus(['Menunggu Validasi', 'Berkas Diproses']);
-    const dataSelesai = filterDataByStatus(['Ditolak', 'Diterima']);
+                    return {
+                        id: item.id,
+                        nopel: item.no_lay,
+                        tanggal: item.submit_at,
+                        status: status
+                    };
+                });
+
+                setDataProses(fetchedData.filter(item => item.status === 'Menunggu Validasi' || item.status === 'Berkas Diproses'));
+                setDataSelesai(fetchedData.filter(item => item.status === 'Ditolak' || item.status === 'Diterima' || item.status === 'Berkas Tidak Valid'));
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+        };
+
+        if (location.pathname === '/bantuan-logistik') {
+            fetchData('/lay-bantuan-logistik');
+        } else if (location.pathname === '/santunan-kematian') {
+            fetchData('/lay-santunan-kematian');
+        }
+    }, [location.pathname]);
 
     return (
         <>
@@ -151,11 +178,10 @@ function Lay() {
                                 {activeTab === 'Pengajuan' ? (
                                     <>
                                         <div className="mb-3">
-                                            <AlertLayanan desc="Berkas yang diunggah akan diproses saat hari dan jam kerja berlangsung." />
+                                            <AlertLayanan desc="Berkas yang diunggah akan diproses saat hari dan jam kerja berlangsung." showAlert />
                                         </div>
                                         {renderForm()}
                                     </>
-                                    
                                 ) : activeTab === 'Proses' ? (
                                     <TableLayanan data={dataProses} layanan={getLayananName()} />
                                 ) : (

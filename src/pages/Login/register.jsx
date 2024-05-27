@@ -10,6 +10,8 @@ import PasswordLog from "../../components/Input Field/passwordLog";
 import axios from 'axios';
 import AlertRegDone from '../../components/Alert/alertRegDone';
 import AlertLayanan from '../../components/Alert/alertLayanan';
+import AlertRegErr from '../../components/Alert/alertRegErr';
+import apiConfig from '../../config/config';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -21,12 +23,15 @@ function Register() {
         rt: '',
         email: '',
         no_telepon: '',
-        password: ''
+        password: '',
+        role_id: '2'
     });
 
     const [selectedKecamatan, setSelectedKecamatan] = useState('');
     const [kelurahanOptions, setKelurahanOptions] = useState([]);
     const [isRegistered, setIsRegistered] = useState(false);
+    const [isAvailable, setIsAvailable] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const allKelurahan = [
         { value: 'Belimbing', label: 'Belimbing' },
@@ -63,26 +68,50 @@ function Register() {
                 setKelurahanOptions([]);
                 break;
         }
+        setFormData({ ...formData, kecamatan: selectedValue });
+        const newErrors = { ...errors };
+        delete newErrors.kecamatan;
+        setErrors(newErrors);
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.NIK.trim()) newErrors.NIK = 'NIK is required';
+        if (!formData.nama.trim()) newErrors.nama = 'Nama is required';
+        if (!formData.alamat.trim()) newErrors.alamat = 'Alamat is required';
+        if (!formData.kecamatan.trim()) newErrors.kecamatan = 'Kecamatan is required';
+        if (!formData.kelurahan.trim()) newErrors.kelurahan = 'Kelurahan is required';
+        if (!formData.rt.trim()) newErrors.rt = 'RT is required';
+        if (!formData.no_telepon.trim()) newErrors.no_telepon = 'No Telepon is required';
+        if (!formData.password.trim()) newErrors.password = 'Password is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
         window.scrollTo(0, 0);
+        if (!validateForm()) {
+            return;
+        }
         try {
-            console.log("FormData:", formData); // Tambahkan log untuk memeriksa formData sebelum pengiriman
-    
-            const response = await axios.post('http://localhost:4121/api/register', formData);
+            console.log("FormData:", formData);
+            const response = await axios.post(`${apiConfig.baseURL}/api/register`, formData);
             console.log(response.data);
             setIsRegistered(true);
+            setIsAvailable(false); // Reset error alert if previously shown
         } catch (error) {
             console.error("Error:", error.response.data);
-            alert(error.response.data || "Error occurred during registration.");
+            setIsAvailable(true);
+            setIsRegistered(false); // Reset success alert if previously shown
         }
     };
-    
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+        const newErrors = { ...errors };
+        delete newErrors[name];
+        setErrors(newErrors);
     };
 
 
@@ -101,17 +130,18 @@ function Register() {
                         </div>
                     </div>
                     <div className="row mx-auto my-4">
-                        <div className="col-lg-7 mx-auto border rounded p-5 mx-auto" style={{backgroundColor: 'white'}}>
+                        <div className="col-lg-7 mx-auto border rounded p-5 mx-auto" style={{ backgroundColor: 'white' }}>
                             <h4 className="ubuntu-sans-medium">Register</h4>
-                            {isRegistered && <AlertRegDone />}
+                            {isAvailable && <AlertRegErr desc='NIK yang Anda masukkan sudah terdaftar dalam sistem kami. Silakan periksa kembali NIK Anda atau hubungi layanan pelanggan kami untuk bantuan lebih lanjut' showAlert={isAvailable} setShowAlert={setIsAvailable} />}
+                            {isRegistered && <AlertRegDone show={isRegistered} setShow={setIsRegistered} />}
                             <div className="mt-3 mb-2">
                                 <AlertLayanan desc='Silakan isi data sesuai dengan yang tertera di KTP Anda.' />
                             </div>
                             <div className="form-login">
-                                <InputFieldLog label="NIK" placeholder="Masukkan NIK" name="NIK" value={formData.NIK} onChange={handleInputChange} />
-                                <InputFieldLog label="Nama" placeholder="Masukkan Nama" name="nama" value={formData.nama} onChange={handleInputChange} />
-                                <TextAreaLog label="Alamat" placeholder="Masukkan Alamat" name="alamat" value={formData.alamat} onChange={handleInputChange} />
-                                <OptionFieldLog 
+                                <InputFieldLog label="NIK" placeholder="Masukkan NIK" name="NIK" value={formData.NIK} onChange={handleInputChange} error={errors.NIK} />
+                                <InputFieldLog label="Nama" placeholder="Masukkan Nama" name="nama" value={formData.nama} onChange={handleInputChange} error={errors.nama} />
+                                <TextAreaLog label="Alamat" placeholder="Masukkan Alamat" name="alamat" value={formData.alamat} onChange={handleInputChange} error={errors.alamat} />
+                                <OptionFieldLog
                                     label="Kecamatan"
                                     placeholder="Pilih Kecamatan"
                                     options={[
@@ -121,27 +151,29 @@ function Register() {
                                     ]}
                                     onChange={handleKecamatanChange}
                                     value={selectedKecamatan}
-                                    name="kecamatan" 
+                                    name="kecamatan"
+                                    error={errors.kecamatan}
                                 />
-                                <OptionFieldLog 
+                                <OptionFieldLog
                                     label="Kelurahan"
                                     placeholder="Pilih Kelurahan"
-                                    options={kelurahanOptions} // Menggunakan state untuk opsi kelurahan
-                                    name="kelurahan" 
-                                    value={formData.kelurahan} 
+                                    options={kelurahanOptions}
+                                    name="kelurahan"
+                                    value={formData.kelurahan}
                                     onChange={handleInputChange}
+                                    error={errors.kelurahan}
                                 />
-                                <InputFieldLog label="RT" placeholder="Masukkan RT" name="rt" value={formData.rt} onChange={handleInputChange} />
+                                <InputFieldLog label="RT" placeholder="Masukkan RT" name="rt" value={formData.rt} onChange={handleInputChange} error={errors.rt} />
                                 <InputFieldLog label="Email" placeholder="Masukkan Email" name="email" value={formData.email} onChange={handleInputChange} />
-                                <InputFieldLog label="No Telepon" placeholder="Masukkan No Telepon" name="no_telepon" value={formData.no_telepon} onChange={handleInputChange} />
-                                <PasswordLog label="Password" placeholder="Masukkan Password" name="password" value={formData.password} onChange={handleInputChange} />
+                                <InputFieldLog label="No Telepon" placeholder="Masukkan No Telepon" name="no_telepon" value={formData.no_telepon} onChange={handleInputChange} error={errors.no_telepon} />
+                                <PasswordLog label="Password" placeholder="Masukkan Password" name="password" value={formData.password} onChange={handleInputChange} error={errors.password} />
                                 <PasswordLog label="Confirm Password" placeholder="Masukkan Password" />
                                 <div className="mt-3">
-                                <div className="btn btn-primary w-100 ubuntu-sans-medium p-2" style={{fontSize: '.85rem'}} onClick={handleSubmit}>Register</div>
+                                    <div className="btn btn-primary w-100 ubuntu-sans-medium p-2" style={{ fontSize: '.85rem' }} onClick={handleSubmit}>Register</div>
                                 </div>
-                                <div className="rounded my-4" style={{ height:'2px', width: '100%', backgroundColor: '#e0e0e0' }}></div>
+                                <div className="rounded my-4" style={{ height: '2px', width: '100%', backgroundColor: '#e0e0e0' }}></div>
                                 <div className="to-regist">
-                                    <p className="ubuntu-sans-regular text-center" style={{fontSize: '.85rem'}}>Sudah punya akun? <NavLink to='/login' className='text-primary text-decoration-none'>Login</NavLink> </p>
+                                    <p className="ubuntu-sans-regular text-center" style={{ fontSize: '.85rem' }}>Sudah punya akun? <NavLink to='/login' className='text-primary text-decoration-none'>Login</NavLink> </p>
                                 </div>
                             </div>
                         </div>

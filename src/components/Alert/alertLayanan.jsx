@@ -22,8 +22,4 @@ AlertLayanan.propTypes = {
     desc: PropTypes.string.isRequired
 };
 
-AlertLayanan.defaultProps = {
-    showAlert: true
-};
-
 export default AlertLayanan;

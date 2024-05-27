@@ -5,6 +5,7 @@ import LogoDinas from '../../assets/images/Logo Pemkot Bontang.svg';
 import "../Navbar/navbar.css"
 import { useState, useEffect } from 'react';
 import { NavLink } from "react-router-dom";
+import Logout from '../logout.jsx';
 
 function CollapsibleExample() {
     const [scrollPosition, setScrollPosition] = useState(0);
@@ -24,24 +25,24 @@ function CollapsibleExample() {
 
     return (
         <Navbar collapseOnSelect expand="lg" className={`z-3 position-fixed fixed-top ${scrollPosition > 0 ? 'scrolled' : ''}`}>
-        <Container>
-            <Navbar.Brand className='d-flex' href="#home">
-                <img src={LogoDinas} className='pe-2' alt="" />
-                <div className="namaLogo">
-                    <p className={`ubuntu-sans-medium ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Dinas Sosial dan Pemberdayaan</p>
-                    <p className={`ubuntu-sans-medium ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Masyarakat Kota Bontang</p>
-                </div>
-            </Navbar.Brand>
-            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Navbar.Collapse className='flex-grow-0' id="responsive-navbar-nav">
-            <Nav>
-                <NavLink to="/home" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Beranda</NavLink>
-                <NavLink to="/profile" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Profile</NavLink>
-                <NavLink to="/notifikasi" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Notifikasi</NavLink>
-                <NavLink to="/login" activeclassname='active' className={`ubuntu-sans-medium px-0 ps-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Logout</NavLink>
-            </Nav>
-            </Navbar.Collapse>
-        </Container>
+            <Container>
+                <Navbar.Brand className='d-flex' href="#home">
+                    <img src={LogoDinas} className='pe-2' alt="" />
+                    <div className="namaLogo">
+                        <p className={`ubuntu-sans-medium ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Dinas Sosial dan Pemberdayaan</p>
+                        <p className={`ubuntu-sans-medium ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Masyarakat Kota Bontang</p>
+                    </div>
+                </Navbar.Brand>
+                <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                <Navbar.Collapse className='flex-grow-0' id="responsive-navbar-nav">
+                    <Nav className='d-flex'>
+                        <NavLink to="/home" activeclassname='active' className={`ubuntu-sans-medium px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Beranda</NavLink>
+                        <NavLink to="/profile" activeclassname='active' className={`ubuntu-sans-medium px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Profile</NavLink>
+                        <NavLink to="/notifikasi" activeclassname='active' className={`ubuntu-sans-medium px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Notifikasi</NavLink>
+                        <Logout />
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
         </Navbar>
     );
 }
