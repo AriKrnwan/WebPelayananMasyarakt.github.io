@@ -14,12 +14,14 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 function App() {
   return (
     <Routes>
+      <Route path="/home" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/home" element={<ProtectedRoute element={Home} />} />
+      <Route path="/bantuan-logistik" element={<Lay />} />
+      {/* <Route path="/home" element={<ProtectedRoute element={Home} />} /> */}
       <Route path="/profile" element={<ProtectedRoute element={Profile} />} />
       <Route path="/notifikasi" element={<ProtectedRoute element={Notifikasi} />} />
-      <Route path="/bantuan-logistik" element={<ProtectedRoute element={Lay} />} />
+      {/* <Route path="/bantuan-logistik" element={<ProtectedRoute element={Lay} />} /> */}
       <Route path="/santunan-kematian" element={<ProtectedRoute element={Lay} />} />
       <Route path="/SKT" element={<ProtectedRoute element={Lay} />} />
       <Route path="/SIO" element={<ProtectedRoute element={Lay} />} />
