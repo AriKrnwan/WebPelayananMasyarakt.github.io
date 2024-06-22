@@ -20,55 +20,36 @@ function CardInformasi() {
                     }
                 });
 
-                // Jika tidak ada data dari response, tambahkan data dummy
-                const dummyData = [
-                    {
-                        id: 101,
-                        foto: JSON.stringify(["path/to/foto1.jpg"]),
-                        judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
-                        submit_at: new Date().toISOString()
-                    },
-                    {
-                        id: 102,
-                        foto: JSON.stringify(["path/to/foto2.jpg"]),
-                        judul: "Informasi Dummy 2",
-                        submit_at: new Date().toISOString()
-                    }
-                ];
-
-                if (response.data.length === 0) {
-                    setData(dummyData);
-                } else {
-                    setData(response.data);
-                }
-
+                setData(response.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
-                // Tambahkan data dummy jika terjadi kesalahan
-                const dummyData = [
-                    {
-                        id: 101,
-                        foto: JSON.stringify(["path/to/foto1.jpg"]),
-                        judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
-                        submit_at: new Date().toISOString()
-                    },
-                    {
-                        id: 102,
-                        foto: JSON.stringify(["path/to/foto2.jpg"]),
-                        judul: "Informasi Dummy 2",
-                        submit_at: new Date().toISOString()
-                    }
-                ];
-                setData(dummyData);
             }
         };
 
         fetchData();
     }, []);
 
+    // Data dummy
+    const dummyData = [
+        {
+            id: 101,
+            foto: JSON.stringify(["path/to/foto1.jpg"]),
+            judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
+            submit_at: new Date().toISOString()
+        },
+        {
+            id: 102,
+            foto: JSON.stringify(["path/to/foto2.jpg"]),
+            judul: "Informasi Dummy 2",
+            submit_at: new Date().toISOString()
+        }
+    ];
+
+    const displayedData = data.length > 0 ? data : dummyData;
+
     return (
         <>
-            {data.map((info, index) => (
+            {displayedData.map((info, index) => (
                 <div className="col-lg-4 mb-3" key={info.id}>
                     <div className="card p-3">
                         <div className="gambar-card d-flex justify-content-center align-items-center mb-2">
