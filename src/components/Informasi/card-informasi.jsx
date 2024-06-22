@@ -19,7 +19,8 @@ function CardInformasi() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                // Tambahkan data dummy
+
+                // Jika tidak ada data dari response, tambahkan data dummy
                 const dummyData = [
                     {
                         id: 101,
@@ -34,10 +35,31 @@ function CardInformasi() {
                         submit_at: new Date().toISOString()
                     }
                 ];
-                setData([...response.data, ...dummyData]);
-                console.log([...response.data, ...dummyData]);
+
+                if (response.data.length === 0) {
+                    setData(dummyData);
+                } else {
+                    setData(response.data);
+                }
+
             } catch (error) {
                 console.error("Error fetching data:", error);
+                // Tambahkan data dummy jika terjadi kesalahan
+                const dummyData = [
+                    {
+                        id: 101,
+                        foto: JSON.stringify(["path/to/foto1.jpg"]),
+                        judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
+                        submit_at: new Date().toISOString()
+                    },
+                    {
+                        id: 102,
+                        foto: JSON.stringify(["path/to/foto2.jpg"]),
+                        judul: "Informasi Dummy 2",
+                        submit_at: new Date().toISOString()
+                    }
+                ];
+                setData(dummyData);
             }
         };
 
