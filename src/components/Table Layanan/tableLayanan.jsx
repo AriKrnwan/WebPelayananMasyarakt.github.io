@@ -135,6 +135,17 @@ function TableLayanan({ data, layanan }) {
         }
     };
 
+    // Data dummy
+    const dummyData = [
+        { id: 1, nopel: 'NOP001', tanggal: '2024-06-20T10:30:00Z', status: 'Menunggu Validasi' },
+        { id: 2, nopel: 'NOP002', tanggal: '2024-06-19T11:00:00Z', status: 'Berkas Diproses' },
+        { id: 3, nopel: 'NOP003', tanggal: '2024-06-18T09:15:00Z', status: 'Ditolak' },
+        { id: 4, nopel: 'NOP004', tanggal: '2024-06-17T14:20:00Z', status: 'Diterima' },
+        { id: 5, nopel: 'NOP005', tanggal: '2024-06-16T12:45:00Z', status: 'Berkas Tidak Valid' }
+    ];
+
+    const displayedData = data.length > 0 ? sortedData : dummyData;
+
     return (
         <>
             <div className="row mx-auto py-3 overflow-hidden mx-auto">
@@ -166,7 +177,7 @@ function TableLayanan({ data, layanan }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedData.slice(startIndex, endIndex).map((item, index) => (
+                            {displayedData.slice(startIndex, endIndex).map((item, index) => (
                                 <tr key={index}>
                                     <td className='text-center col-no'>{startIndex + index + 1}</td>
                                     <td className="col-nopel">{item.nopel}</td>
@@ -207,13 +218,13 @@ function TableLayanan({ data, layanan }) {
                 </div>
                 <div className="d-flex justify-content-between align-items-center mt-2">
                     <div className="showing-entries" style={{ fontSize: '.85rem' }}>
-                        Showing {Math.min(startIndex + 1, data.length)} to {Math.min(endIndex, data.length)} of {data.length} entries
+                        Showing {Math.min(startIndex + 1, displayedData.length)} to {Math.min(endIndex, displayedData.length)} of {displayedData.length} entries
                     </div>
                     <div className="pagination d-flex gap-2">
                         <button className="btn btn-primary" onClick={handlePrevPage} disabled={currentPage === 1} style={{ fontSize: '.85rem' }}>
                             <IoIosArrowBack />
                         </button>
-                        <button className="btn btn-primary" onClick={handleNextPage} disabled={endIndex >= data.length} style={{ fontSize: '.85rem' }}>
+                        <button className="btn btn-primary" onClick={handleNextPage} disabled={endIndex >= displayedData.length} style={{ fontSize: '.85rem' }}>
                             <IoIosArrowForward />
                         </button>
                     </div>

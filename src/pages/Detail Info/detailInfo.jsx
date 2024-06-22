@@ -4,6 +4,7 @@ import Wallpaper2 from "../../components/Wallpaper/wallpaper2";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../components/api";
+import bontang from "../../assets/images/bontang.jpg"
 
 function DetailInfo() {
     const { id } = useParams();
@@ -42,7 +43,39 @@ function DetailInfo() {
             }
         };
 
-        fetchData();
+        const fetchDummyData = async () => {
+            // Data dummy yang sama dengan yang digunakan di CardInformasi
+            const dummyData = [
+                {
+                    id: 101,
+                    judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
+                    isi: "Halo semuanya! Ini adalah aplikasi pelayanan msyarakat untuk Dinas Sosial dan Pemberdayaan Masyarakat. Perlu diingat aplikasi ini baru berupa tampilan jadi belum bisa difungsikan secara baik. Tapi saya memohon kepada temman-teman yang telah melihat ini jangan lupa untuk mengisi kuesioner terkait apakah aplikasi ini memudahkan masyarakat dalam mengakses dan melakukan permohonan layanan masyarakat yg ada pada Dinas terkait. Terima Kasih",
+                    submit_at: new Date().toISOString(),
+                    foto: setFotoUrl(bontang)
+                },
+                {
+                    id: 102,
+                    judul: "Informasi Dummy 2",
+                    isi: "Ini adalah isi dari informasi dummy 2.",
+                    submit_at: new Date().toISOString(),
+                    foto: setFotoUrl(bontang)
+                }
+            ];
+
+            const info = dummyData.find(item => item.id === parseInt(id));
+            if (info) {
+                setJudul(info.judul);
+                setIsi(info.isi);
+                setTanggal(formatDate(info.submit_at));
+                setFotoUrl(`http://localhost:4121/${info.foto}`);
+            }
+        };
+
+        if (parseInt(id) >= 101 && parseInt(id) <= 102) {
+            fetchDummyData();
+        } else {
+            fetchData();
+        }
     }, [id]);
 
     return (

@@ -6,7 +6,6 @@ import Wallpaper2 from "../../components/Wallpaper/wallpaper2";
 import '../../components/Form Layanan/formLayanan.css';
 import TableLayanan from "../../components/Table Layanan/tableLayanan.jsx";
 import SidebarLay from "../../components/Sidebar/sidebarLay.jsx";
-// import FormPengaduan from '../../components/Form Submit/submitPengaduan.jsx';
 import AlertLayanan from '../../components/Alert/alertLayanan.jsx';
 import SubmitBantuanLogistik from '../../components/Form Submit/submitBantuanLogistik.jsx';
 import api from '../../components/api.jsx';
@@ -153,6 +152,18 @@ function Lay() {
                 console.error('Error fetching data:', error);
             });
         };
+
+        // Data dummy
+        const dummyData = [
+            { id: 1, nopel: 'NOP001', tanggal: '2024-06-20T10:30:00Z', status: 'Menunggu Validasi' },
+            { id: 2, nopel: 'NOP002', tanggal: '2024-06-19T11:00:00Z', status: 'Berkas Diproses' },
+            { id: 3, nopel: 'NOP003', tanggal: '2024-06-18T09:15:00Z', status: 'Ditolak' },
+            { id: 4, nopel: 'NOP004', tanggal: '2024-06-17T14:20:00Z', status: 'Diterima' },
+            { id: 5, nopel: 'NOP005', tanggal: '2024-06-16T12:45:00Z', status: 'Berkas Tidak Valid' }
+        ];
+
+        setDataProses(dummyData.filter(item => item.status === 'Menunggu Validasi' || item.status === 'Berkas Diproses'));
+        setDataSelesai(dummyData.filter(item => item.status === 'Ditolak' || item.status === 'Diterima' || item.status === 'Berkas Tidak Valid'));
 
         if (location.pathname === '/bantuan-logistik') {
             fetchData('/lay-bantuan-logistik');

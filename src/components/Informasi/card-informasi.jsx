@@ -3,6 +3,7 @@ import foto1 from "../../assets/images/Foto Kegiatan.png";
 import "./informasi.css";
 import { useState, useEffect } from 'react';
 import api from "../api";
+// import fotoBontang from "../../assets/images/bontang.jpg"
 
 function CardInformasi() {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -18,8 +19,23 @@ function CardInformasi() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setData(response.data);
-                console.log(response.data);
+                // Tambahkan data dummy
+                const dummyData = [
+                    {
+                        id: 101,
+                        foto: JSON.stringify(["path/to/foto1.jpg"]),
+                        judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
+                        submit_at: new Date().toISOString()
+                    },
+                    {
+                        id: 102,
+                        foto: JSON.stringify(["path/to/foto2.jpg"]),
+                        judul: "Informasi Dummy 2",
+                        submit_at: new Date().toISOString()
+                    }
+                ];
+                setData([...response.data, ...dummyData]);
+                console.log([...response.data, ...dummyData]);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
