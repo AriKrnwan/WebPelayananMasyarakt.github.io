@@ -27,7 +27,7 @@ function InputFieldLog({
                 required
                 isInvalid={!!error}
             />
-            <Form.Control.Feedback type="invalid" style={{ fontSize: '.75rem' }}>
+            <Form.Control.Feedback type="invalid" style={{ fontSize: '.85rem' }}>
                 {error}
             </Form.Control.Feedback>
         </div>
@@ -39,7 +39,7 @@ InputFieldLog.propTypes = {
     placeholder: PropTypes.string.isRequired,
     disabled: PropTypes.bool,
     value: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
+    onChange: PropTypes.func,
     name: PropTypes.string.isRequired,
     error: PropTypes.string,
     col: PropTypes.string // optional prop for column class

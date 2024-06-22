@@ -2,24 +2,22 @@ import Form from 'react-bootstrap/Form';
 import PropTypes from 'prop-types';
 
 function InputNumber({ label, placeholder, disabled, name, value, onChange, error }) {
-    const handleChange = (e) => {
-        const { name, value } = e.target; // Pastikan kita mendapatkan `name` dari `e.target`
-        if (onChange) {
-            onChange(name, value); // Kirim `name` dan `value` secara langsung
-        }
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        onChange(name, value); // Mengubah format pemanggilan onChange
     };
 
     return (
         <div className="input-field col-lg-6 py-2 mb-2">
-            <Form.Label className='ubuntu-sans-medium mb-1' style={{fontSize: '.85rem'}}>{label}</Form.Label>
+            <Form.Label className='ubuntu-sans-medium mb-1' style={{ fontSize: '.85rem' }}>{label}</Form.Label>
             <Form.Control
                 disabled={disabled}
                 type="number"
                 placeholder={placeholder}
-                style={{fontSize: '.85rem'}}
+                style={{ fontSize: '.85rem' }}
                 name={name}
                 value={value}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 required
                 isInvalid={!!error} // Add validation state
             />
@@ -34,7 +32,7 @@ InputNumber.propTypes = {
     disabled: PropTypes.bool,
     name: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired, // Accept string or number
-    onChange: PropTypes.func,
+    onChange: PropTypes.func.isRequired,
     error: PropTypes.string // Add error prop type
 };
 

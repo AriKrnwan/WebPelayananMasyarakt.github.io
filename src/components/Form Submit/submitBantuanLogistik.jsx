@@ -1,20 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import InputFile from "../../components/Input Field/inputFile";
-import InputNumber from "../../components/Input Field/inputNumber";
 import PropTypes from 'prop-types';
-import AlertLogErr from '../Alert/alertLogErr';
 import api from '../api';
+import Swal from 'sweetalert2';
+import InputNumber from '../Input Field/inputNumber';
 
 function SubmitBantuanLogistik({ disabled = false }) {
     const [selectedData, setSelectedData] = useState({
-        ktp: null,
-        surat_permohonan_bantuan_logistik: null,
-        dokumentasi_bencana: null,
+        ktp: [],
+        surat_permohonan_bantuan_logistik: [],
+        dokumentasi_bencana: [],
         jml_tedampak: ''
     });
+    const [userNIK, setUserNIK] = useState(null);
     const [errors, setErrors] = useState({});
-    const [showAlert, setShowAlert] = useState(false);
-    const [noLay, setNoLay] = useState('');
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.NIK) {
+            setUserNIK(user.NIK);
+        } else {
+            console.error('User NIK not found in local storage');
+        }
+    }, []);
 
     const handleInputChange = (name, value) => {
         setSelectedData(prevState => ({ ...prevState, [name]: value }));
@@ -23,10 +31,10 @@ function SubmitBantuanLogistik({ disabled = false }) {
 
     const validateInputs = () => {
         const newErrors = {};
-        if (!selectedData.ktp) newErrors.ktp = 'KTP is required';
-        if (!selectedData.surat_permohonan_bantuan_logistik) newErrors.surat_permohonan_bantuan_logistik = 'Surat is required';
-        if (!selectedData.dokumentasi_bencana) newErrors.dokumentasi_bencana = 'Dokumentasi is required';
-        if (!selectedData.jml_tedampak) newErrors.jml_tedampak = 'Jumlah Terdampak is required';
+        const requiredFields = ['ktp', 'surat_permohonan_bantuan_logistik', 'dokumentasi_bencana', 'jml_tedampak'];
+        for (const field of requiredFields) {
+            if (selectedData[field].length === 0) newErrors[field] = `${field.toUpperCase()} is required`;
+        }
         return newErrors;
     };
 
@@ -39,21 +47,29 @@ function SubmitBantuanLogistik({ disabled = false }) {
     
         try {
             const token = localStorage.getItem('token');
-    
-            // Check if token is obtained from local storage
-            if (token) {
-                console.log('User token found:', token);
-            } else {
+            if (!token) {
                 console.error('User token not found');
-                // Show a message or redirect to the login page
                 return;
             }
     
             const formData = new FormData();
-            formData.append('ktp', selectedData.ktp);
-            formData.append('surat_permohonan_bantuan_logistik', selectedData.surat_permohonan_bantuan_logistik);
-            formData.append('dokumentasi_bencana', selectedData.dokumentasi_bencana);
+            const fields = ['ktp', 'surat_permohonan_bantuan_logistik', 'dokumentasi_bencana'];
+            fields.forEach(field => {
+                selectedData[field].forEach(file => {
+                    formData.append(field, file);
+                });
+            });
+
+            // Append the jumlah terdampak
             formData.append('jml_tedampak', selectedData.jml_tedampak);
+
+            // Append the user NIK
+            if (userNIK) {
+                formData.append('user_nik', userNIK);
+            } else {
+                console.error('User NIK not found');
+                return;
+            }
     
             const config = {
                 headers: {
@@ -64,57 +80,62 @@ function SubmitBantuanLogistik({ disabled = false }) {
     
             const response = await api.post('/upload-Bantuan-Logistik', formData, config);
             console.log(response.data);
-            setShowAlert(true);
-            setNoLay(response.data.no_lay);
+
+            // Show success alert
+            Swal.fire({
+                icon: "success",
+                title: "Data Berhasil Diupload",
+                showDenyButton: false,
+                showCancelButton: false,
+                confirmButtonText: "OK",
+                denyButtonText: `Don't save`,
+                text: "Klik ok",
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    window.location.reload();
+                }
+            });
         } catch (error) {
             console.error('Error uploading data:', error);
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+            }
         }
     };
 
     return (
         <>
-            <div className="col-lg-12">
-                <AlertLogErr
-                    desc={`Berkas berhasil diupload. No. Lay: ${noLay}`}
-                    variant='success'
-                    showAlert={showAlert}
-                    setShowAlert={setShowAlert}
-                />
-            </div>
             <InputFile
                 id="ktp"
                 name="ktp"
                 label='KTP'
-                disabled={disabled}
-                showDownloadButton={true}
-                onChange={(e) => handleInputChange('ktp', e.target.files[0])}
+                showDownloadButton={false}
+                onChange={(e) => handleInputChange('ktp', Array.from(e.target.files))}
                 error={errors.ktp}
             />
             <InputFile
-                id="surat"
+                id="surat_permohonan_bantuan_logistik"
                 name="surat_permohonan_bantuan_logistik"
                 label='Surat Permohonan Bantuan Logistik'
-                disabled={disabled}
-                showDownloadButton={true}
-                onChange={(e) => handleInputChange('surat_permohonan_bantuan_logistik', e.target.files[0])}
+                showDownloadButton={false}
+                onChange={(e) => handleInputChange('surat_permohonan_bantuan_logistik', Array.from(e.target.files))}
                 error={errors.surat_permohonan_bantuan_logistik}
             />
             <InputFile
-                id="dokumentasi"
+                id="dokumentasi_bencana"
                 name="dokumentasi_bencana"
-                label='Dokumentasi Kejadian Bencana'
-                disabled={disabled}
-                showDownloadButton={true}
-                onChange={(e) => handleInputChange('dokumentasi_bencana', e.target.files[0])}
+                label='Dokumentasi Bencana'
+                showDownloadButton={false}
+                onChange={(e) => handleInputChange('dokumentasi_bencana', Array.from(e.target.files))}
                 error={errors.dokumentasi_bencana}
             />
             <InputNumber
                 label='Jumlah Terdampak'
                 name="jml_tedampak"
                 placeholder="Masukkan jumlah"
-                disabled={disabled}
                 value={selectedData.jml_tedampak}
-                onChange={handleInputChange}
+                onChange={handleInputChange} 
                 error={errors.jml_tedampak}
             />
             {!disabled && (

@@ -15,20 +15,10 @@ import FormPengangkatanAnak from '../../components/Form Layanan/formPengakatanAn
 import FormPBIJK from '../../components/Form Layanan/formPBIJK.jsx';
 import FormDTKS from '../../components/Form Layanan/formDTKS.jsx';
 import AlertLayanan from '../../components/Alert/alertLayanan.jsx';
-import { useEffect, useState } from 'react';
+import FormPengaduan from '../../components/Form Layanan/formPengaduan.jsx';
 
 function EditPengajuan() {
     const { layanan } = useParams();
-    const [data, setData] = useState(null);
-
-    useEffect(() => {
-        // Ambil data dari localStorage
-        const selectedData = localStorage.getItem('selectedPengajuan');
-        console.log('Data yang diambil dari localStorage:', selectedData);
-        if (selectedData) {
-            setData(JSON.parse(selectedData));
-        }
-    }, []);
 
     const renderForm = () => {
         switch (layanan) {
@@ -36,26 +26,28 @@ function EditPengajuan() {
                 return <FormBantuanLogistik />;
             case 'santunan-kematian':
                 return <FormSantunanKematian />;
-            case '/SKT':
+            case 'SKT':
                 return <FormSKT />;
-            case '/SIO':
+            case 'SIO':
                 return <FormSIO />;
-            case '/pengumpulan-uang-dan-barang':
+            case 'pengumpulan-uang-dan-barang':
                 return <FormPUB />;
-            case '/rehabilitasi-lansia':
+            case 'rehabilitasi-lansia':
                 return <FormRehabLansia />;
-            case '/rumah-singgah':
+            case 'rumah-singgah':
                 return <FormRumahSinggah />;
-            case '/rehabilitasi-anak-terlantar':
+            case 'rehabilitasi-anak-terlantar':
                 return <FormRehabAnak />;
-            case '/penyandang-disabilitas':
+            case 'penyandang-disabilitas':
                 return <FormPenyandangDisabilitas />;
-            case '/pengangkatan-anak':
+            case 'pengangkatan-anak':
                 return <FormPengangkatanAnak />;
-            case '/PBI-JK':
+            case 'PBI-JK':
                 return <FormPBIJK />;
-            case '/DTKS':
+            case 'DTKS':
                 return <FormDTKS />;
+            case 'pengaduan':
+                return <FormPengaduan />;
             default:
                 return null;
         }

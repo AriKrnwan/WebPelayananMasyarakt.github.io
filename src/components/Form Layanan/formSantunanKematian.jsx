@@ -2,134 +2,116 @@ import { useEffect, useState } from 'react';
 import InputFile from "../../components/Input Field/inputFile";
 import PropTypes from 'prop-types';
 import InputFieldLog from '../Input Field/inputFieldLog';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import TextAreaLog from '../Input Field/textAreaLog';
-import AlertLogErr from '../Alert/alertLogErr';
-import apiConfig from '../../config/config';
 import api from '../api';
+import Swal from 'sweetalert2';
+import { useParams } from "react-router-dom";
 
 function FormSantunanKematian({ disabled }) {
-    const [selectedData, setSelectedData] = useState(null);
-    const [ktpFile, setKtpFile] = useState(null);
-    const [suratFile, setSuratFile] = useState(null);
-    const [aktaFile, setAktaFile] = useState(null);
-    const [suketFile, setSuketFile] = useState(null);
-    const [sktmFile, setSKTMFile] = useState(null);
-    const [kkFile, setKKFile] = useState(null);
-    const [rekeningFile, setRekeningFile] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const { nopel } = useParams();
+    const [data, setData] = useState(null);
     const navigate = useNavigate();
-
-    // State untuk alert
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertVariant, setAlertVariant] = useState('success');
+    const [ktpFile, setKtpFile] = useState(null);
+    const [suratPermohonanFile, setSuratPermohonanFile] = useState(null);
+    const [suketAktaFile, setAktaFile] = useState(null);
+    const [ahliWarisFile, setAhliWarisFile] = useState(null);
+    const [SKTMFile, setSKTMFile] = useState(null);
+    const [KKFile, setKKFile] = useState(null);
+    const [rekeningFile, setRekeningFile] = useState(null);
+    const layanan = 'lay_santunan_kematian'
 
     useEffect(() => {
-        const storedData = localStorage.getItem('selectedPengajuan');
-        if (storedData) {
-            setSelectedData(JSON.parse(storedData));
-        }
-    }, []);
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await api.get(`/lay-santunan-kematian/${nopel}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                console.log('Data pengajuan yang berhasil diambil:', response.data);
+                setData(response.data);
+            } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    console.error('Unauthorized: Please log in first.');
+                } else {
+                    console.error('Error fetching data:', error);
+                }
+            }
+        };
 
-    const downloadFile = (filePath) => {
-        window.open(`${apiConfig.baseURL}/download-file?path=${filePath}`);
-    };
+        fetchData();
+    }, [nopel]);
 
-    const downloadProduct = () => {
-        if (selectedData && selectedData.product) {
-            window.open(`${apiConfig.baseURL}/download-file?path=${selectedData.product}`);
-        } else {
-            alert('File produk tidak tersedia.');
-        }
-    };
-
-    // const handleChange = (e) => {
-    //     const { name, value } = e.target; 
-    //     setSelectedData({
-    //         ...selectedData,
-    //         [name]: value
-    //     });
-    // };
-
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        if (name === "ktp") setKtpFile(files[0]);
-        if (name === "surat_permohonan_santunan_kematian") setSuratFile(files[0]);
-        if (name === "akta_kematian") setAktaFile(files[0]);
-        if (name === "suket_ahli_waris") setSuketFile(files[0]);
-        if (name === "sktm") setSKTMFile(files[0]);
-        if (name === "kk") setKKFile(files[0]);
-        if (name === "rekening") setRekeningFile(files[0]);
-    };
-
-    const handleSubmit = async () => {
-        if (!selectedData || !selectedData.no_lay) {
-            alert('Data tidak valid');
-            return;
-        }
-
-        const formData = new FormData();
+    const handleUpdate = async () => {
+        let formData = new FormData();
+        formData.append('id', data.id);
         if (ktpFile) formData.append('ktp', ktpFile);
-        if (suratFile) formData.append('surat_permohonan_santunan_kematian', suratFile);
-        if (aktaFile) formData.append('akta_kematian', aktaFile);
-        if (suketFile) formData.append('suket_ahli_waris', suketFile);
-        if (sktmFile) formData.append('sktm', sktmFile);
-        if (kkFile) formData.append('kk', kkFile);
+        if (suratPermohonanFile) formData.append('surat_permohonan_santunan_kematian', suratPermohonanFile);
+        if (suketAktaFile) formData.append('akta_kematian', suketAktaFile);
+        if (ahliWarisFile) formData.append('suket_ahli_waris', ahliWarisFile);
+        if (SKTMFile) formData.append('sktm', SKTMFile);
+        if (KKFile) formData.append('kk', KKFile);
         if (rekeningFile) formData.append('rekening', rekeningFile);
-        formData.append('no_lay', selectedData.no_lay);
-        formData.append('submit_at', selectedData.submit_at);
-        formData.append('valid_at', selectedData.valid_at);
-        formData.append('reject_at', selectedData.reject_at);
-        formData.append('accept_at', selectedData.accept_at);
-        formData.append('reason', selectedData.reason);
-        formData.append('product', selectedData.product);
 
         try {
             const token = localStorage.getItem('token');
-            const response = await api.put(`/update-Santunan-Kematian/${selectedData.no_lay}`, formData, {
+            const response = await api.put(`/update-santunan-kematian/${data.no_lay}`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
                 }
             });
-
-            // Update state with the new data
-            const updatedData = { ...selectedData, ...response.data };
-            setSelectedData(updatedData);
-            localStorage.setItem('selectedPengajuan', JSON.stringify(updatedData)); // Simpan data terbaru ke localStorage
-
-            // Tampilkan alert sukses
-            setAlertMessage('Data berhasil diperbarui');
-            setAlertVariant('success');
-            setShowAlert(true);
+            console.log('Data validated successfully:', response.data);
+    
+            Swal.fire({
+                title: "Berhasil mengupdate data",
+                text: "Tekan ok",
+                icon: "success"
+            });
         } catch (error) {
             console.error('Error updating data:', error);
-            // Tampilkan alert error
-            setAlertMessage('Terjadi kesalahan saat memperbarui data');
-            setAlertVariant('danger');
-            setShowAlert(true);
+            alert('Terjadi kesalahan saat memperbarui data');
+        }
+    };
+    
+
+    const handleDownload = async () => {
+        try {
+            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+
+            const fileName = 'files.zip';
+            link.setAttribute('download', fileName);
+
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error('Error downloading file:', error);
         }
     };
 
     const handleDelete = async () => {
         try {
             const token = localStorage.getItem('token');
-            await api.delete(`/delete-santunan-kematian/${selectedData.no_lay}`, {
+            await api.delete(`/delete-santunan-kematian/${data.no_lay}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-
-            setSelectedData(null);
+            setData(null);
             localStorage.removeItem('selectedPengajuan');
-            setShowModal(false);
+            Swal.fire("Berhasil dihapus!", "", "success");
             navigate('/santunan-kematian');
         } catch (error) {
             console.error('Error deleting data:', error);
-            alert('Terjadi kesalahan saat menghapus data');
         }
     };
 
@@ -142,8 +124,8 @@ function FormSantunanKematian({ disabled }) {
     };
 
     const calculateStatus = () => {
-        if (selectedData) {
-            const { submit_at, valid_at, reject_at, accept_at } = selectedData;
+        if (data) {
+            const { submit_at, valid_at, reject_at, accept_at } = data;
             if (submit_at && !valid_at && !reject_at && !accept_at) {
                 return "Menunggu Validasi";
             } else if (submit_at && valid_at && !reject_at && !accept_at) {
@@ -159,28 +141,42 @@ function FormSantunanKematian({ disabled }) {
         return "Tidak Diketahui";
     };
 
+    const showAlert = () => {
+        Swal.fire({
+            title: "Apakah Anda yakin untuk membatalkan pengajuan?",
+            showDenyButton: false,
+            showCancelButton: true,
+            confirmButtonText: "Iya",
+            icon: 'question',
+            confirmButtonColor: "#d33",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                handleDelete();
+            } else if (result.isDenied) {
+                Swal.fire("Changes are not saved", "", "info");
+            }
+        });
+    };
+
     const status = calculateStatus();
 
     return (
         <>
-            <div className="mb-3">
-                <AlertLogErr desc={alertMessage} variant={alertVariant} showAlert={showAlert} setShowAlert={setShowAlert} />
-            </div>
-            {selectedData && (
+            {data && (
                 <>
                     <InputFieldLog 
                         label='No. Pelayanan'
                         disabled
                         col='col-lg-6'
                         name='no_lay'
-                        value={selectedData.no_lay}
+                        value={data.no_lay}
                     />
                     <InputFieldLog 
-                        label='Tanggal'
+                        label='Tanggal Mengajukan'
                         disabled
                         col='col-lg-6'
                         name='submit_at'
-                        value={formatDate(selectedData.submit_at)}
+                        value={formatDate(data.submit_at)}
                     />
                     <InputFieldLog 
                         label='Status'
@@ -193,7 +189,7 @@ function FormSantunanKematian({ disabled }) {
                             label='Alasan Ditolak'
                             disabled
                             name='reason'
-                            value={selectedData.reason}
+                            value={data.reason}
                         />
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
@@ -202,86 +198,86 @@ function FormSantunanKematian({ disabled }) {
                         name="ktp"
                         label="KTP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.ktp}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
+                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        table={layanan}
                     />
                     <InputFile
                         id="surat_permohonan_santunan_kematian"
                         name="surat_permohonan_santunan_kematian"
                         label="Surat Permohonan Santunan Kematian"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.surat_permohonan_santunan_kematian}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
+                        onChange={(e) => setSuratPermohonanFile(e.target.files[0])}
+                        table={layanan}
                     />
                     <InputFile
                         id="akta_kematian"
                         name="akta_kematian"
                         label="Akta Kematian"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.akta_kematian}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
+                        onChange={(e) => setAktaFile(e.target.files[0])}
+                        table={layanan}
                     />
                     <InputFile
                         id="suket_ahli_waris"
                         name="suket_ahli_waris"
                         label="Surat Keterangan Ahli Waris"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.suket_ahli_waris}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
+                        onChange={(e) => setAhliWarisFile(e.target.files[0])}
+                        table={layanan}
                     />
                     <InputFile
                         id="sktm"
                         name="sktm"
                         label="SKTM"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.sktm}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
+                        onChange={(e) => setSKTMFile(e.target.files[0])}
+                        table={layanan}
                     />
                     <InputFile
                         id="kk"
                         name="kk"
-                        label="Kartu Keluarga (KK)"
+                        label="Kartu Keluarga"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.kk}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
+                        onChange={(e) => setKKFile(e.target.files[0])}
+                        table={layanan}
                     />
                     <InputFile
                         id="rekening"
                         name="rekening"
                         label="Rekening"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={selectedData.rekening}
-                        onDownload={downloadFile}
-                        onChange={handleFileChange}
+                        filePath={data.id}
                         showDownloadButton={true}
+                        onChange={(e) => setRekeningFile(e.target.files[0])}
+                        table={layanan}
                     />
                     {!disabled && (
                         <div className="mt-3 text-end">
                             {status === "Menunggu Validasi" && (
                                 <>
-                                    <button className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} type="button" onClick={() => setShowModal(true)}>
+                                    <button className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} type="button" onClick={showAlert}>
                                         Batalkan Pengajuan
                                     </button>
-                                    <button className="btn btn-primary" style={{ fontSize: '.9rem' }} type="button" onClick={handleSubmit}>
+                                    <button className="btn btn-primary" style={{ fontSize: '.9rem' }} type="button" onClick={handleUpdate}>
                                         Update Data
                                     </button>
                                 </>
                             )}
-                            {status === "Diterima" && selectedData.product && (
-                                <button className="btn btn-success" style={{ fontSize: '.9rem' }} type="button" onClick={downloadProduct}>
+                            {status === "Diterima" && data.product && (
+                                <button className="btn btn-success" style={{ fontSize: '.9rem' }} type="button" onClick={handleDownload}>
                                     Download Produk
                                 </button>
                             )}
@@ -289,21 +285,6 @@ function FormSantunanKematian({ disabled }) {
                     )}
                 </>
             )}
-
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Konfirmasi Penghapusan</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>Apakah Anda yakin ingin membatalkan pengajuan ini?</Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Batal
-                    </Button>
-                    <Button variant="danger" onClick={handleDelete}>
-                        Batalkan Pengajuan
-                    </Button>
-                </Modal.Footer>
-            </Modal>
         </>
     );
 }

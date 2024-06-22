@@ -3,7 +3,7 @@ import CardInformasi from "./card-informasi"
 function Informasi() {
     return (
         <>
-            <div className="info-and-more d-flex justify-content-between align-items-end mt-5 mb-2">
+            <div className="info-and-more d-flex justify-content-between align-items-end mt-5 mb-2 mx-auto">
                 <div className="info">
                     <h4 className="poppins-medium mb-0">Informasi</h4>
                 </div>
@@ -11,9 +11,7 @@ function Informasi() {
                     <a href="" className="poppins-medium" style={{fontSize: '.8rem', color: '#333', textDecoration: 'none'}}>Informasi Lainnya</a>
                 </div>
             </div>
-            <div className="row g-3">
-                <CardInformasi/>
-                <CardInformasi/>
+            <div className="row g-3 mx-auto">
                 <CardInformasi/>
             </div>
         </>

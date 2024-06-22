@@ -7,14 +7,12 @@ import LogoDinas from '../../assets/images/Logo Pemkot Bontang.svg';
 import Footer from "../../components/Footer/footer";
 import PasswordLog from "../../components/Input Field/passwordLog";
 import api from '../../components/api'; // Import axios instance
-import AlertLogErr from '../../components/Alert/alertLogErr';
+// import AlertLogErr from '../../components/Alert/alertLogErr';
+import Swal from 'sweetalert2';
 
 function Login() {
     const [formData, setFormData] = useState({ NIK: '', password: '' });
-    const [error, setError] = useState(false);
     const [errors, setErrors] = useState({});
-    const [showAlert, setShowAlert] = useState(false);
-    const [NIKNotFoundError, setNIKNotFoundError] = useState(false);
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {
@@ -44,15 +42,47 @@ function Login() {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            navigate('/home');
-        } catch (error) {
-            setError(true);
-            if (error.response && error.response.status === 404) {
-                setNIKNotFoundError(true);
-                setShowAlert(true);
+            // Redirect users based on role_id
+            if (user.role === 2) {
+                navigate('/home');
+            } else if (user.role === 1) {
+                navigate('/admin/dashboard');
             } else {
-                setNIKNotFoundError(false);
-                setShowAlert(true);
+                // Handle other roles if needed
+            }
+
+            Swal.fire({
+                title: "Good job!",
+                text: "Anda berhasil login. Silahkan menikmati layanan kami.",
+                icon: "success"
+            });
+        } catch (error) {
+            if (error.response) {
+                if (error.response.status === 404) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "NIK Belum Terdaftar",
+                        text: "NIK yang Anda masukkan belum terdaftar. Silakan daftar terlebih dahulu.",
+                    });
+                } else if (error.response.status === 400) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Salah Input",
+                        text: "NIK atau password salah.",
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Terjadi kesalahan pada server.",
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Tidak dapat terhubung ke server.",
+                });
             }
         }
     };
@@ -65,7 +95,7 @@ function Login() {
             <div className="row w-100 mx-auto">
                 <div className="col-lg-9 mx-auto">
                     <div className="logo d-flex align-items-center py-4">
-                    <img src={LogoDinas} className='pe-2' alt="" />
+                        <img src={LogoDinas} className='pe-2' alt="" />
                         <div className="namaLogo">
                             <p className={'ubuntu-sans-medium text-white'}>Dinas Sosial dan Pemberdayaan</p>
                             <p className={'ubuntu-sans-medium text-white'}>Masyarakat Kota Bontang</p>
@@ -74,7 +104,6 @@ function Login() {
                     <div className="row mx-auto my-4">
                         <div className="col-lg-7 mx-auto border rounded p-5 mx-auto" style={{backgroundColor: 'white'}}>
                             <h4 className="ubuntu-sans-medium">Login</h4>
-                            {error && <AlertLogErr variant='danger' desc={NIKNotFoundError ? 'NIK yang Anda masukkan belum terdaftar. Silakan daftar terlebih dahulu.' : 'NIK atau password yang Anda masukkan salah.'} showAlert={showAlert} setShowAlert={setShowAlert} />}
                             <div className="form-login">
                                 <InputFieldLog 
                                     label="NIK" 
@@ -92,7 +121,7 @@ function Login() {
                                     onChange={handleInputChange} 
                                     error={errors.password} 
                                 />
-                                <NavLink>
+                                <NavLink to='/lupa-password'>
                                     <p className="text-end" style={{fontSize: '.85rem'}}>Lupa Password?</p>
                                 </NavLink>
                                 <div className="mt-3">

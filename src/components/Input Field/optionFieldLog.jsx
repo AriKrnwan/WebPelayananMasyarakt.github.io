@@ -19,7 +19,7 @@ function OptionFieldLog({ label, placeholder, disabled, options, onChange, value
                     <option key={index} value={option.value}>{option.label}</option>
                 ))}
             </Form.Control>
-            {error && <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>}
+            {error && <Form.Control.Feedback type="invalid" style={{ fontSize: '.85rem' }}>{error}</Form.Control.Feedback>}
         </div>
     );
 }

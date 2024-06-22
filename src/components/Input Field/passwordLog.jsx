@@ -44,7 +44,7 @@ function PasswordLog({
                     )}
                 </div>
             </div>
-            {error && <div className="text-danger mt-1" style={{ fontSize: '.75rem' }}>{error}</div>}
+            {error && <div className="text-danger mt-1" style={{ fontSize: '.85rem' }}>{error}</div>}
         </div>
     );
 }

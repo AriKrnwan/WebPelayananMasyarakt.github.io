@@ -21,14 +21,39 @@ td {
 
 .fixed-table th, .fixed-table td {
     word-wrap: break-word;
-    white-space: nowrap;
 }
 
 .col-no {
     width: 50px;
 }
 
+.col-aksi {
+    width: 120px;
+}
+
 .col-nopel {
+    width: 170px;
+}
+
+@media (max-width: 768px) {
+    .custom-entries {
+        width: 20% !important;
+    }
+
+    .col-nopel {
+        width: 150px;
+    }
+
+    .col-tanggal {
+        width: 150px;
+    }
+
+    .col-status {
+        width: 150px;
+    }
+}
+
+/* .col-nopel {
     width: 150px;
 }
 
@@ -38,14 +63,5 @@ td {
 
 .col-status {
     width: 150px;
-}
+} */
 
-.col-aksi {
-    width: 200px;
-}
-
-@media (max-width: 768px) {
-    .custom-entries {
-        width: 20% !important;
-    }
-}

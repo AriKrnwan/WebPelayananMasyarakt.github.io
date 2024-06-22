@@ -6,21 +6,22 @@ import Wallpaper2 from "../../components/Wallpaper/wallpaper2";
 import '../../components/Form Layanan/formLayanan.css';
 import TableLayanan from "../../components/Table Layanan/tableLayanan.jsx";
 import SidebarLay from "../../components/Sidebar/sidebarLay.jsx";
-import FormSKT from '../../components/Form Layanan/formSKT.jsx';
-import FormSIO from '../../components/Form Layanan/formSIO.jsx';
-import FormPUB from '../../components/Form Layanan/formPUB.jsx';
-import FormRehabLansia from '../../components/Form Layanan/formRehabLansia.jsx';
-import FormRumahSinggah from '../../components/Form Layanan/formRumahSinggah.jsx';
-import FormRehabAnak from '../../components/Form Layanan/formRehabAnak.jsx';
-import FormPenyandangDisabilitas from '../../components/Form Layanan/formPenyandangDisabilitas.jsx';
-import FormPengangkatanAnak from '../../components/Form Layanan/formPengakatanAnak.jsx';
-import FormPBIJK from '../../components/Form Layanan/formPBIJK.jsx';
-import FormDTKS from '../../components/Form Layanan/formDTKS.jsx';
-import FormPengaduan from '../../components/Form Layanan/formPengaduan.jsx';
+// import FormPengaduan from '../../components/Form Submit/submitPengaduan.jsx';
 import AlertLayanan from '../../components/Alert/alertLayanan.jsx';
 import SubmitBantuanLogistik from '../../components/Form Submit/submitBantuanLogistik.jsx';
 import api from '../../components/api.jsx';
 import SubmitSantunanKematian from '../../components/Form Submit/submitSantunanKematian.jsx';
+import SubmitSKT from '../../components/Form Submit/submitSKT.jsx';
+import SubmitSIO from '../../components/Form Submit/submitSIO.jsx';
+import SubmitPUB from '../../components/Form Submit/submitPUB.jsx';
+import SubmitRumahSinggah from '../../components/Form Submit/submitRumahSinggah.jsx';
+import SubmitRehabilitasiLansia from '../../components/Form Submit/submitRehabillitasiLansia.jsx';
+import SubmitRehabAnak from '../../components/Form Submit/submitRehabAnak.jsx';
+import SubmitPenyandangDisabilitas from '../../components/Form Submit/submitPenyandangDisabilitas.jsx';
+import SubmitPengangkatanAnak from '../../components/Form Submit/submitPengangkatanAnak.jsx';
+import SubmitDTKS from '../../components/Form Submit/submitDTKS.jsx';
+import SubmitPBIJK from '../../components/Form Submit/submitPBIJK.jsx';
+import SubmitPengaduan from '../../components/Form Submit/submitPengaduan.jsx';
 
 function Lay() {
     const [activeTab, setActiveTab] = useState('Pengajuan');
@@ -44,27 +45,27 @@ function Lay() {
             case '/santunan-kematian':
                 return <SubmitSantunanKematian />;
             case '/SKT':
-                return <FormSKT />;
+                return <SubmitSKT />;
             case '/SIO':
-                return <FormSIO />;
+                return <SubmitSIO />;
             case '/pengumpulan-uang-dan-barang':
-                return <FormPUB />;
+                return <SubmitPUB />;
             case '/rehabilitasi-lansia':
-                return <FormRehabLansia />;
+                return <SubmitRehabilitasiLansia />;
             case '/rumah-singgah':
-                return <FormRumahSinggah />;
+                return <SubmitRumahSinggah />;
             case '/rehabilitasi-anak-terlantar':
-                return <FormRehabAnak />;
+                return <SubmitRehabAnak />;
             case '/penyandang-disabilitas':
-                return <FormPenyandangDisabilitas />;
+                return <SubmitPenyandangDisabilitas />;
             case '/pengangkatan-anak':
-                return <FormPengangkatanAnak />;
+                return <SubmitPengangkatanAnak />;
             case '/PBI-JK':
-                return <FormPBIJK />;
+                return <SubmitPBIJK />;
             case '/DTKS':
-                return <FormDTKS />;
+                return <SubmitDTKS />;
             case '/pengaduan-DSPM':
-                return <FormPengaduan />;
+                return <SubmitPengaduan />;
             default:
                 return null;
         }
@@ -115,7 +116,7 @@ function Lay() {
 
         const fetchData = (endpoint) => {
             api.get(endpoint, {
-                params: { user_id: userData.id },
+                params: { user_nik: userData.NIK },
                 headers: { Authorization: `Bearer ${userData.token}` }
             })
             .then(response => {
@@ -157,6 +158,26 @@ function Lay() {
             fetchData('/lay-bantuan-logistik');
         } else if (location.pathname === '/santunan-kematian') {
             fetchData('/lay-santunan-kematian');
+        } else if (location.pathname === '/SKT') {
+            fetchData('/lay-SKT');
+        } else if (location.pathname === '/SIO') {
+            fetchData('/lay-SIO');
+        } else if (location.pathname === '/pengumpulan-uang-dan-barang') {
+            fetchData('/lay-pengumpulan-uang-dan-barang');
+        } else if (location.pathname === '/rumah-singgah') {
+            fetchData('/lay-rumah-singgah');
+        } else if (location.pathname === '/rehabilitasi-lansia') {
+            fetchData('/lay-rehabilitasi-lansia');
+        } else if (location.pathname === '/rehabilitasi-anak-terlantar') {
+            fetchData('/lay-rehabilitasi-anak-terlantar');
+        } else if (location.pathname === '/penyandang-disabilitas') {
+            fetchData('/lay-penyandang-disabilitas');
+        } else if (location.pathname === '/pengangkatan-anak') {
+            fetchData('/lay-pengangkatan-anak');
+        } else if (location.pathname === '/DTKS') {
+            fetchData('/lay-DTKS');
+        } else if (location.pathname === '/PBI-JK') {
+            fetchData('/lay-PBI-JK');
         }
     }, [location.pathname]);
 

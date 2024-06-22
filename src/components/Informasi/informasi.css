@@ -27,7 +27,7 @@
 .bubble-chat {
     background-color: #333;
     width: 260px;
-    top: -68px;
+    bottom: 36px;
     left: 30px;
 }
 

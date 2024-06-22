@@ -1,6 +1,7 @@
+// src/components/Logout.jsx
 import { useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
-import api from '../components/api.jsx'; // Import axios instance
+import api from '../components/api'; // Import axios instance
 
 function Logout() {
     const navigate = useNavigate();

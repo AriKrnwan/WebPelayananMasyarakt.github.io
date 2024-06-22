@@ -1,17 +1,12 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import FormPengaduan from "../../components/Form Layanan/formPengaduan";
+import SubmitPengaduan from "../../components/Form Submit/submitPengaduan";
 import CollapsibleExample from '../../components/Navbar/navbar';
 import Wallpaper2 from '../../components/Wallpaper/wallpaper2';
 import Footer from '../../components/Footer/footer';
 import TablePengaduan from '../../components/Table Pengaduan/tablePengaduan';
 import SidebarPengaduan from '../../components/Sidebar/sidebarPengaduan';
 
-const mockData = [
-    // Mock data untuk pengujian
-    { nopel: '001', tanggal: '2024-05-17', status: 'Belum Dijawab' },
-    { nopel: '002', tanggal: '2024-05-16', status: 'Dijawab' }
-];
 
 function Pengaduan() {
     const [activeTab, setActiveTab] = useState('Formulir');
@@ -36,9 +31,9 @@ function Pengaduan() {
                         <div className="col-lg-9 mx-auto">
                             <div className="row border rounded py-3 mx-1">
                                 {activeTab === 'Formulir' ? (
-                                    <FormPengaduan />
+                                    <SubmitPengaduan />
                                 ) : (
-                                    <TablePengaduan data={mockData} layanan="layanan-id" />
+                                    <TablePengaduan layanan="layanan-id" />
                                 )}
                             </div>
                         </div>

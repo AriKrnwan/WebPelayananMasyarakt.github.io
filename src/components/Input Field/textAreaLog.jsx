@@ -15,7 +15,7 @@ function TextAreaLog({ label, placeholder, disabled, value, onChange, name, erro
                 name={name} 
                 required 
             />
-            {error && <div className="invalid-feedback">{error}</div>}
+            {error && <div className="invalid-feedback" style={{ fontSize: '.85rem' }}>{error}</div>}
         </div>
     );
 }
