@@ -82,12 +82,7 @@ function SubmitRehabAnak({ disabled = false }) {
                 confirmButtonText: "OK",
                 denyButtonText: `Don't save`,
                 text: "Klik ok",
-            }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
-            });
+            })
         } catch (error) {
             console.error('Error uploading data:', error);
         }
@@ -98,7 +93,7 @@ function SubmitRehabAnak({ disabled = false }) {
             <InputFile
                 id="ktp"
                 name="ktp"
-                label='KTP'
+                label='KTP Pelapor'
                 disabled={disabled}
                 showDownloadButton={false}
                 onChange={(e) => handleInputChange('ktp', Array.from(e.target.files))}
@@ -107,9 +102,10 @@ function SubmitRehabAnak({ disabled = false }) {
             <InputFile
                 id="identitas"
                 name="identitas"
-                label='Identitas Kota Bontang'
+                label='Identitas Anak'
                 disabled={disabled}
                 showDownloadButton={false}
+                moreInfo='Beridentitas Kota Bontang'
                 onChange={(e) => handleInputChange('identitas', Array.from(e.target.files))}
                 error={errors.identitas}
             />

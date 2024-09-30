@@ -3,9 +3,8 @@ import foto1 from "../../assets/images/Foto Kegiatan.png";
 import "./informasi.css";
 import { useState, useEffect } from 'react';
 import api from "../api";
-// import fotoBontang from "../../assets/images/bontang.jpg"
 
-function CardInformasi() {
+function CardInformasi({ maxItems }) {
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [data, setData] = useState([]);
     const baseURL = "http://localhost:4121/";
@@ -29,28 +28,16 @@ function CardInformasi() {
         fetchData();
     }, []);
 
-    // Data dummy
-    const dummyData = [
-        {
-            id: 101,
-            foto: JSON.stringify(["path/to/foto1.jpg"]),
-            judul: "Aplikasi Pelayanan Masyarakat Kota Bontang",
-            submit_at: new Date().toISOString()
-        },
-        {
-            id: 102,
-            foto: JSON.stringify(["path/to/foto2.jpg"]),
-            judul: "Informasi Dummy 2",
-            submit_at: new Date().toISOString()
-        }
-    ];
+    // Mengurutkan data berdasarkan id dari yang terbesar
+    const sortedData = [...data].sort((a, b) => b.id - a.id);
 
-    const displayedData = data.length > 0 ? data : dummyData;
+    // Memotong data jika maxItems ada
+    const displayedData = maxItems ? sortedData.slice(0, maxItems) : sortedData;
 
     return (
         <>
             {displayedData.map((info, index) => (
-                <div className="col-lg-4 mb-3" key={info.id}>
+                <div className="col-lg-4" key={info.id}>
                     <div className="card p-3">
                         <div className="gambar-card d-flex justify-content-center align-items-center mb-2">
                             <img 
@@ -59,7 +46,7 @@ function CardInformasi() {
                                 alt={info.judul} 
                             />
                         </div>
-                        <div className="judul-info position-relative mb-3">
+                        <div className="judul-info position-relative mb-2">
                             <p className="ubuntu-sans-regular">{new Date(info.submit_at).toLocaleDateString()}</p>
                             <div className="judul">
                                 <h6 

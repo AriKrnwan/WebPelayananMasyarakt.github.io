@@ -10,7 +10,7 @@ import SidebarAdmin from "../../components admin/sidebar";
 
 function FormAdminPengaduan() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+    const [selectedData, setFormData] = useState({
         NIK: "",
         namaLengkap: "",
         alamat: "",
@@ -26,22 +26,24 @@ function FormAdminPengaduan() {
         foto: [],
     });
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({ ...selectedData, [name]: value });
     };
 
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData({ ...formData, [name]: files });
+    const handleFileChange = (name, files) => {
+        setFormData(prevState => ({ ...prevState, [name]: files }));
+        setErrors(prevState => ({ ...prevState, [name]: null }));
     };
 
     const handleKirimNIK = async () => {
         try {
-            const response = await api.get(`/getUserByNIK/${formData.NIK}`);
+            const response = await api.get(`/getUserByNIK/${selectedData.NIK}`);
             const data = response.data;
             setFormData({
-                ...formData,
+                ...selectedData,
                 namaLengkap: data.full_name || "",
                 alamat: data.alamat || "",
                 kecamatan: data.kecamatan || "",
@@ -60,37 +62,63 @@ function FormAdminPengaduan() {
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!selectedData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (!selectedData.masalah.trim()) newErrors.masalah = 'Field tidak boleh kosong';
+        if (!selectedData.harapan.trim()) newErrors.harapan = 'Field tidak boleh kosong';
+        if (selectedData.foto.length === 0) newErrors.foto = 'Field tidak boleh kosong';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
-        // Validation checks
-        if (!formData.NIK || !formData.masalah || !formData.harapan) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Harap mengisi field masalah dan harapan yang diperlukan',
-            });
+        window.scrollTo(0, 0);
+        if (!validateForm()) {
             return;
         }
 
-        const formDataToSend = new FormData();
-        formDataToSend.append('NIK', formData.NIK);
-        formDataToSend.append('masalah', formData.masalah);
-        formDataToSend.append('harapan', formData.harapan);
-        formDataToSend.append('foto', formData.foto[0]);
-
         try {
             const token = localStorage.getItem('token');
-            const response = await api.post('/admin-upload-pengaduan', formDataToSend, {
+            if (!token) {
+                console.error('User token not found');
+                return;
+            }
+    
+            const formData = new FormData();
+            const fields = ['foto'];
+            fields.forEach(field => {
+                selectedData[field].forEach(file => {
+                    formData.append(field, file);
+                });
+            });
+
+            // Append the jumlah terdampak
+            formData.append('masalah', selectedData.masalah);
+            formData.append('harapan', selectedData.harapan);
+            formData.append('NIK', selectedData.NIK);
+    
+            const config = {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
                 }
-            });
-            console.log("Data submitted successfully:", response.data);
+            };
+    
+            const response = await api.post('/admin-upload-pengaduan', formData, config);
+            console.log(response.data);
+
+            // Show success alert
             Swal.fire({
-                title: "Good job!",
-                text: "Data berhasil dikirim!",
-                icon: "success"
-            });
+                icon: "success",
+                title: "Data Berhasil Diupload",
+                showDenyButton: false,
+                showCancelButton: false,
+                confirmButtonText: "OK",
+                denyButtonText: `Don't save`,
+                text: "Klik ok",
+            })
             navigate('/admin/pengaduan-DSPM');
         } catch (error) {
             console.error("Error submitting form data:", error);
@@ -119,7 +147,7 @@ function FormAdminPengaduan() {
                                         label="NIK"
                                         name="NIK"
                                         placeholder="Masukkan NIK"
-                                        value={formData.NIK}
+                                        value={selectedData.NIK}
                                         onChange={handleChange}
                                     />
                                     <div>
@@ -131,7 +159,7 @@ function FormAdminPengaduan() {
                                     name="namaLengkap"
                                     col="col-lg-6"
                                     placeholder="Nama Lengkap"
-                                    value={formData.namaLengkap}
+                                    value={selectedData.namaLengkap}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -140,7 +168,7 @@ function FormAdminPengaduan() {
                                     name="alamat"
                                     col="col-lg-6"
                                     placeholder="Alamat"
-                                    value={formData.alamat}
+                                    value={selectedData.alamat}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -149,7 +177,7 @@ function FormAdminPengaduan() {
                                     name="kecamatan"
                                     col="col-lg-6"
                                     placeholder="Kecamatan"
-                                    value={formData.kecamatan}
+                                    value={selectedData.kecamatan}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -158,7 +186,7 @@ function FormAdminPengaduan() {
                                     name="kelurahan"
                                     col="col-lg-6"
                                     placeholder="Kelurahan"
-                                    value={formData.kelurahan}
+                                    value={selectedData.kelurahan}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -167,7 +195,7 @@ function FormAdminPengaduan() {
                                     name="rt"
                                     col="col-lg-6"
                                     placeholder="RT"
-                                    value={formData.rt}
+                                    value={selectedData.rt}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -176,7 +204,7 @@ function FormAdminPengaduan() {
                                     name="email"
                                     col="col-lg-6"
                                     placeholder="Email"
-                                    value={formData.email}
+                                    value={selectedData.email}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -185,7 +213,7 @@ function FormAdminPengaduan() {
                                     name="noTelepon"
                                     col="col-lg-6"
                                     placeholder="No. Telepon"
-                                    value={formData.noTelepon}
+                                    value={selectedData.noTelepon}
                                     onChange={handleChange}
                                     disabled
                                 />
@@ -194,22 +222,25 @@ function FormAdminPengaduan() {
                                     label="Masalah"
                                     name="masalah"
                                     placeholder="Masukkan Masalah"
-                                    value={formData.masalah}
+                                    value={selectedData.masalah}
                                     onChange={handleChange}
+                                    error={errors.masalah}
                                     col='col-lg-6'
                                 />
                                 <TextAreaLog
                                     label="Harapan"
                                     name="harapan"
                                     placeholder="Masukkan Harapan"
-                                    value={formData.harapan}
+                                    value={selectedData.harapan}
                                     onChange={handleChange}
+                                    error={errors.harapan}
                                     col='col-lg-6'
                                 />
                                 <InputFile
                                     label="Foto"
                                     name="foto"
-                                    onChange={handleFileChange}
+                                    onChange={(e) => handleFileChange('foto', Array.from(e.target.files))}
+                                    error={errors.foto}
                                 />
                                 <div className="text-end mt-3">
                                     <div className="btn btn-primary" onClick={handleSubmit} style={{fontSize: '.9rem'}}>Kirim</div>

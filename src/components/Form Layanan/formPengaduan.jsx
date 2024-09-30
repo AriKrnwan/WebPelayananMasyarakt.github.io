@@ -179,12 +179,11 @@ function FormPengaduan({ disabled }) {
                         disabled={disabled || status !== "Belum Dijawab"}
                     />
                     <InputFile
-                        id="foto"
                         name="foto"
                         label='Upload foto/gambar'
                         disabled={disabled || status !== "Belum Dijawab"}
                         showDownloadButton={true}
-                        filePath={data.id}
+                        id={data.id}
                         table={layanan}
                         onChange={(e) => setFotoFile(e.target.files[0])}
                     />

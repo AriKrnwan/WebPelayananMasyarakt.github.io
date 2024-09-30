@@ -12,14 +12,24 @@ function FormSantunanKematian({ disabled }) {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const navigate = useNavigate();
-    const [ktpFile, setKtpFile] = useState(null);
-    const [suratPermohonanFile, setSuratPermohonanFile] = useState(null);
-    const [suketAktaFile, setAktaFile] = useState(null);
-    const [ahliWarisFile, setAhliWarisFile] = useState(null);
-    const [SKTMFile, setSKTMFile] = useState(null);
-    const [KKFile, setKKFile] = useState(null);
-    const [rekeningFile, setRekeningFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        surat_permohonan_santunan_kematian: [],
+        akta_kematian: [],
+        suket_ahli_waris: [],
+        sktm: [],
+        kk: [],
+        rekening: [],
+    });
     const layanan = 'lay_santunan_kematian'
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,15 +55,25 @@ function FormSantunanKematian({ disabled }) {
     }, [nopel]);
 
     const handleUpdate = async () => {
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        
+        if (!hasFiles) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (suratPermohonanFile) formData.append('surat_permohonan_santunan_kematian', suratPermohonanFile);
-        if (suketAktaFile) formData.append('akta_kematian', suketAktaFile);
-        if (ahliWarisFile) formData.append('suket_ahli_waris', ahliWarisFile);
-        if (SKTMFile) formData.append('sktm', SKTMFile);
-        if (KKFile) formData.append('kk', KKFile);
-        if (rekeningFile) formData.append('rekening', rekeningFile);
 
         try {
             const token = localStorage.getItem('token');
@@ -79,20 +99,28 @@ function FormSantunanKematian({ disabled }) {
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
-                responseType: 'blob'
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            const fileName = 'files.zip';
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${layanan}/${data.id}/product`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -194,74 +222,67 @@ function FormSantunanKematian({ disabled }) {
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
                     <InputFile
-                        id="ktp"
                         name="ktp"
                         label="KTP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
-                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="surat_permohonan_santunan_kematian"
                         name="surat_permohonan_santunan_kematian"
                         label="Surat Permohonan Santunan Kematian"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setSuratPermohonanFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="akta_kematian"
                         name="akta_kematian"
                         label="Akta Kematian"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setAktaFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
-                    <InputFile
-                        id="suket_ahli_waris"
+                 onChange={handleFileChange}   <InputFile
                         name="suket_ahli_waris"
                         label="Surat Keterangan Ahli Waris"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setAhliWarisFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="sktm"
                         name="sktm"
                         label="SKTM"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setSKTMFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="kk"
                         name="kk"
                         label="Kartu Keluarga"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setKKFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="rekening"
                         name="rekening"
                         label="Rekening"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setRekeningFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     {!disabled && (

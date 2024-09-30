@@ -1,0 +1,7 @@
+.website:hover {
+    text-decoration: underline !important;
+}
+
+.instagram:hover, .facebook:hover {
+    box-shadow: 2px 2px 20px rgb(48, 48, 48, .5);
+}

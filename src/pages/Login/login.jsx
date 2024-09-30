@@ -25,8 +25,8 @@ function Login() {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.NIK.trim()) newErrors.NIK = 'NIK is required';
-        if (!formData.password.trim()) newErrors.password = 'Password is required';
+        if (!formData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (!formData.password.trim()) newErrors.password = 'Field tidak boleh kosong';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -47,12 +47,14 @@ function Login() {
                 navigate('/home');
             } else if (user.role === 1) {
                 navigate('/admin/dashboard');
+            } else if (user.role === 3) {
+                navigate('/kadis/dashboard');
             } else {
                 // Handle other roles if needed
             }
 
             Swal.fire({
-                title: "Good job!",
+                title: "Login Berhasil",
                 text: "Anda berhasil login. Silahkan menikmati layanan kami.",
                 icon: "success"
             });
@@ -67,8 +69,8 @@ function Login() {
                 } else if (error.response.status === 400) {
                     Swal.fire({
                         icon: "error",
-                        title: "Salah Input",
-                        text: "NIK atau password salah.",
+                        title: "Salah Input Password",
+                        text: "Password yang anda inputkan salah.",
                     });
                 } else {
                     Swal.fire({
@@ -121,9 +123,9 @@ function Login() {
                                     onChange={handleInputChange} 
                                     error={errors.password} 
                                 />
-                                <NavLink to='/lupa-password'>
-                                    <p className="text-end" style={{fontSize: '.85rem'}}>Lupa Password?</p>
-                                </NavLink>
+                                <div className='text-end'>
+                                    <NavLink to='/lupa-password' className="text-decoration-none ubuntu-sans-medium" style={{fontSize: '.85rem'}}>Lupa Password?</NavLink>
+                                </div>
                                 <div className="mt-3">
                                     <div 
                                         className="btn btn-primary w-100 ubuntu-sans-medium p-2" 
@@ -136,8 +138,7 @@ function Login() {
                                 <div className="rounded my-4" style={{ height:'2px', width: '100%', backgroundColor: '#e0e0e0' }}></div>
                                 <div className="to-regist">
                                     <p className="ubuntu-sans-regular text-center" style={{fontSize: '.85rem'}}>
-                                        Belum punya akun? 
-                                        <NavLink to='/register' className='text-primary text-decoration-none'>Daftar</NavLink> 
+                                        Belum punya akun? <NavLink to='/register' className='text-primary text-decoration-none ubuntu-sans-medium'>Daftar</NavLink> 
                                     </p>
                                 </div>
                             </div>

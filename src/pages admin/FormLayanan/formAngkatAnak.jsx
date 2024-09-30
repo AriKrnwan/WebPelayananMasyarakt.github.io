@@ -8,16 +8,18 @@ import { useNavigate } from 'react-router-dom';
 
 function FormAdminAngkatAnak() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+    const [selectedData, setFormData] = useState({
         NIK: "",
         namaLengkap: "",
+        gender: "",
         alamat: "",
         kecamatan: "",
         kelurahan: "",
         rt: "",
+        pendidikan: "",
+        pekerjaan: "",
         email: "",
         noTelepon: "",
-        jml_tedampak: "",
         alasan: "",
         produk_layanan: null,
         ktp: [],
@@ -33,27 +35,35 @@ function FormAdminAngkatAnak() {
         form_pernyataan: [],
     });
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({ ...selectedData, [name]: value });
+        const newErrors = { ...errors };
+        delete newErrors[name];
+        setErrors(newErrors);
     };
 
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData({ ...formData, [name]: files });
+    const handleFileChange = (name, files) => {
+        setFormData(prevState => ({ ...prevState, [name]: files }));
+        setErrors(prevState => ({ ...prevState, [name]: null }));
     };
 
     const handleKirimNIK = async () => {
         try {
-            const response = await api.get(`/getUserByNIK/${formData.NIK}`);
+            const response = await api.get(`/getUserByNIK/${selectedData.NIK}`);
             const data = response.data;
             setFormData({
-                ...formData,
+                ...selectedData,
                 namaLengkap: data.full_name || "",
+                gender: data.gender || "",
                 alamat: data.alamat || "",
                 kecamatan: data.kecamatan || "",
                 kelurahan: data.kelurahan || "",
                 rt: data.rt || "",
+                pekerjaan: data.pekerjaan || "",
+                pendidikan: data.pendidikan || "",
                 email: data.email || "",
                 noTelepon: data.no_telp || ""
             });
@@ -61,46 +71,63 @@ function FormAdminAngkatAnak() {
             console.error("Error fetching user data:", error);
             Swal.fire({
                 icon: "error",
-                title: "Oops...",
-                text: "NIK Tidak Ada",
+                title: "NIK Tidak Tersedia",
             });
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!selectedData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (selectedData.ktp.length === 0) newErrors.ktp = 'Field tidak boleh kosong';
+        if (selectedData.suket_fisik_jiwa.length === 0) newErrors.suket_fisik_jiwa = 'Field tidak boleh kosong';
+        if (selectedData.suket_narkoba.length === 0) newErrors.suket_narkoba = 'Field tidak boleh kosong';
+        if (selectedData.skck.length === 0) newErrors.skck = 'Field tidak boleh kosong';
+        if (selectedData.suket_penghasilan.length === 0) newErrors.suket_penghasilan = 'Field tidak boleh kosong';
+        if (selectedData.izin_tertulis.length === 0) newErrors.izin_tertulis = 'Field tidak boleh kosong';
+        if (selectedData.kk.length === 0) newErrors.kk = 'Field tidak boleh kosong';
+        if (selectedData.akta_kelahiran.length === 0) newErrors.akta_kelahiran = 'Field tidak boleh kosong';
+        if (selectedData.akta_nikah.length === 0) newErrors.akta_nikah = 'Field tidak boleh kosong';
+        if (selectedData.foto.length === 0) newErrors.foto = 'Field tidak boleh kosong';
+        if (selectedData.form_pernyataan.length === 0) newErrors.form_pernyataan = 'Field tidak boleh kosong';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
-        // Validation checks
-        if (!formData.NIK || formData.ktp.length === 0 || formData.suket_fisik_jiwa.length === 0 || formData.suket_narkoba.length === 0 || formData.skck.length === 0 || formData.suket_penghasilan.length === 0 || formData.izin_tertulis.length === 0 || formData.kk.length === 0 || formData.akta_kelahiran.length === 0 || formData.akta_nikah.length === 0 || formData.foto.length === 0 || formData.form_pernyataan.length === 0 ) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Harap mengisi semua field yang diperlukan',
-            });
+        window.scrollTo(0, 0);
+        if (!validateForm()) {
             return;
         }
 
-        const formDataToSend = new FormData();
-        formDataToSend.append('NIK', formData.NIK);
-        formDataToSend.append('ktp', formData.ktp[0]);
-        formDataToSend.append('suket_fisik_jiwa', formData.suket_fisik_jiwa[0]);
-        formDataToSend.append('suket_narkoba', formData.suket_narkoba[0]);
-        formDataToSend.append('skck', formData.skck[0]);
-        formDataToSend.append('suket_penghasilan', formData.suket_penghasilan[0]);
-        formDataToSend.append('izin_tertulis', formData.izin_tertulis[0]);
-        formDataToSend.append('kk', formData.kk[0]);
-        formDataToSend.append('akta_kelahiran', formData.akta_kelahiran[0]);
-        formDataToSend.append('akta_nikah', formData.akta_nikah[0]);
-        formDataToSend.append('foto', formData.foto[0]);
-        formDataToSend.append('form_pernyataan', formData.form_pernyataan[0]);
-
         try {
             const token = localStorage.getItem('token');
-            const response = await api.post('/admin-upload-pengangkatan-anak', formDataToSend, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
+            if (!token) {
+                console.error('User token not found');
+                return;
+            }
+
+            const formData = new FormData();
+            const fields = ['ktp', 'suket_fisik_jiwa', 'suket_narkoba', 'skck', 'suket_penghasilan', 'izin_tertulis', 'kk', 'akta_kelahiran', 'akta_nikah', 'foto', 'form_pernyataan'];
+            fields.forEach(field => {
+                selectedData[field].forEach(file => {
+                    formData.append(field, file);
+                });
             });
+
+            formData.append('NIK', selectedData.NIK);
+    
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
+            const response = await api.post('/admin-upload-pengangkatan-anak', formData, config);
             console.log("Data submitted successfully:", response.data);
+
             Swal.fire({
                 title: "Good job!",
                 text: "Data berhasil dikirim!",
@@ -120,8 +147,9 @@ function FormAdminAngkatAnak() {
                     label="NIK"
                     name="NIK"
                     placeholder="Masukkan NIK"
-                    value={formData.NIK}
+                    value={selectedData.NIK}
                     onChange={handleChange}
+                    error={errors.NIK}
                 />
                 <div>
                     <div className="btn btn-primary" onClick={handleKirimNIK} style={{fontSize: '.9rem', marginTop: '-8px'}}>Pilih</div>
@@ -132,7 +160,16 @@ function FormAdminAngkatAnak() {
                 name="namaLengkap"
                 col="col-lg-6"
                 placeholder="Nama Lengkap"
-                value={formData.namaLengkap}
+                value={selectedData.namaLengkap}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Jenis Kelamin"
+                name="gender"
+                col="col-lg-6"
+                placeholder="Jenis Kelamin"
+                value={selectedData.gender}
                 onChange={handleChange}
                 disabled
             />
@@ -141,7 +178,7 @@ function FormAdminAngkatAnak() {
                 name="alamat"
                 col="col-lg-6"
                 placeholder="Alamat"
-                value={formData.alamat}
+                value={selectedData.alamat}
                 onChange={handleChange}
                 disabled
             />
@@ -150,7 +187,7 @@ function FormAdminAngkatAnak() {
                 name="kecamatan"
                 col="col-lg-6"
                 placeholder="Kecamatan"
-                value={formData.kecamatan}
+                value={selectedData.kecamatan}
                 onChange={handleChange}
                 disabled
             />
@@ -159,7 +196,7 @@ function FormAdminAngkatAnak() {
                 name="kelurahan"
                 col="col-lg-6"
                 placeholder="Kelurahan"
-                value={formData.kelurahan}
+                value={selectedData.kelurahan}
                 onChange={handleChange}
                 disabled
             />
@@ -168,7 +205,25 @@ function FormAdminAngkatAnak() {
                 name="rt"
                 col="col-lg-6"
                 placeholder="RT"
-                value={formData.rt}
+                value={selectedData.rt}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pendidikan Terakhir"
+                name="pendidikan"
+                col="col-lg-6"
+                placeholder="Pendidikan Terakhir"
+                value={selectedData.pendidikan}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pekerjaan"
+                name="pekerjaan"
+                col="col-lg-6"
+                placeholder="Pekerjaan"
+                value={selectedData.pekerjaan}
                 onChange={handleChange}
                 disabled
             />
@@ -177,7 +232,7 @@ function FormAdminAngkatAnak() {
                 name="email"
                 col="col-lg-6"
                 placeholder="Email"
-                value={formData.email}
+                value={selectedData.email}
                 onChange={handleChange}
                 disabled
             />
@@ -186,7 +241,7 @@ function FormAdminAngkatAnak() {
                 name="noTelepon"
                 col="col-lg-6"
                 placeholder="No. Telepon"
-                value={formData.noTelepon}
+                value={selectedData.noTelepon}
                 onChange={handleChange}
                 disabled
             />
@@ -194,57 +249,68 @@ function FormAdminAngkatAnak() {
             <InputFile
                 label="KTP"
                 name="ktp"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('ktp', Array.from(e.target.files))}
+                error={errors.ktp}
             />
             <InputFile
                 label="Surat Keterangan Fisik dan Kejiwaan"
                 name="suket_fisik_jiwa"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('suket_fisik_jiwa', Array.from(e.target.files))}
+                error={errors.suket_fisik_jiwa}
             />
             <InputFile
                 label="Surat Keterangan Bebas Narkoba"
                 name="suket_narkoba"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('suket_narkoba', Array.from(e.target.files))}
+                error={errors.suket_narkoba}
             />
             <InputFile
                 label="SKCK"
                 name="skck"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('skck', Array.from(e.target.files))}
+                error={errors.skck}
             />
             <InputFile
                 label="Surat Keterangan Penghasilan"
                 name="suket_penghasilan"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('suket_penghasilan', Array.from(e.target.files))}
+                error={errors.suket_penghasilan}
             />
             <InputFile
                 label="Persetujuan atau Izin Tertulis"
                 name="izin_tertulis"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('izin_tertulis', Array.from(e.target.files))}
+                error={errors.izin_tertulis}
             />
             <InputFile
                 label="KK Calon Anak Angkat(CAA)"
                 name="kk"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('kk', Array.from(e.target.files))}
+                error={errors.kk}
             />
             <InputFile
                 label="Akta Kelahiran CAA"
                 name="akta_kelahiran"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('akta_kelahiran', Array.from(e.target.files))}
+                error={errors.akta_kelahiran}
             />
             <InputFile
                 label="Akta Nikah"
                 name="akta_nikah"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('akta_nikah', Array.from(e.target.files))}
+                error={errors.akta_nikah}
             />
             <InputFile
                 label="Foto"
                 name="foto"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('foto', Array.from(e.target.files))}
+                error={errors.foto}
             />
             <InputFile
                 label="Form Pernyataan"
                 name="form_pernyataan"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('form_pernyataan', Array.from(e.target.files))}
+                error={errors.form_pernyataan}
             />
             <div className="text-end mt-3">
                 <div className="btn btn-primary" onClick={handleSubmit} style={{fontSize: '.9rem'}}>Kirim</div>

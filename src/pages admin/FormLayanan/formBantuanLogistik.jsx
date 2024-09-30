@@ -9,13 +9,16 @@ import { useNavigate } from 'react-router-dom';
 
 function FormAdminBantuanLogistik() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+    const [selectedData, setFormData] = useState({
         NIK: "",
         namaLengkap: "",
+        gender: "",
         alamat: "",
         kecamatan: "",
         kelurahan: "",
         rt: "",
+        pendidikan: "",
+        pekerjaan: "",
         email: "",
         noTelepon: "",
         jml_tedampak: "",
@@ -26,27 +29,35 @@ function FormAdminBantuanLogistik() {
         dokumentasi_bencana: []
     });
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({ ...selectedData, [name]: value });
+        const newErrors = { ...errors };
+        delete newErrors[name];
+        setErrors(newErrors);
     };
 
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData({ ...formData, [name]: files });
+    const handleFileChange = (name, files) => {
+        setFormData(prevState => ({ ...prevState, [name]: files }));
+        setErrors(prevState => ({ ...prevState, [name]: null }));
     };
 
     const handleKirimNIK = async () => {
         try {
-            const response = await api.get(`/getUserByNIK/${formData.NIK}`);
+            const response = await api.get(`/getUserByNIK/${selectedData.NIK}`);
             const data = response.data;
             setFormData({
-                ...formData,
+                ...selectedData,
                 namaLengkap: data.full_name || "",
+                gender: data.gender || "",
                 alamat: data.alamat || "",
                 kecamatan: data.kecamatan || "",
                 kelurahan: data.kelurahan || "",
                 rt: data.rt || "",
+                pekerjaan: data.pekerjaan || "",
+                pendidikan: data.pendidikan || "",
                 email: data.email || "",
                 noTelepon: data.no_telp || ""
             });
@@ -54,44 +65,68 @@ function FormAdminBantuanLogistik() {
             console.error("Error fetching user data:", error);
             Swal.fire({
                 icon: "error",
-                title: "Oops...",
-                text: "NIK Tidak Ada",
+                title: "NIK Tidak Tersedia",
             });
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!selectedData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (!selectedData.jml_tedampak.trim()) newErrors.jml_tedampak = 'Field tidak boleh kosong';
+        if (selectedData.ktp.length === 0) newErrors.ktp = 'Field tidak boleh kosong';
+        if (selectedData.surat_permohonan_bantuan_logistik.length === 0) newErrors.surat_permohonan_bantuan_logistik = 'Field tidak boleh kosong';
+        if (selectedData.dokumentasi_bencana.length === 0) newErrors.dokumentasi_bencana = 'Field tidak boleh kosong';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
-        // Validation checks
-        if (!formData.NIK || !formData.jml_tedampak || formData.ktp.length === 0 || formData.surat_permohonan_bantuan_logistik.length === 0 || formData.dokumentasi_bencana.length === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Harap mengisi semua field yang diperlukan',
-            });
+        window.scrollTo(0, 0);
+        if (!validateForm()) {
             return;
         }
 
-        const formDataToSend = new FormData();
-        formDataToSend.append('NIK', formData.NIK);
-        formDataToSend.append('jml_tedampak', formData.jml_tedampak);
-        formDataToSend.append('ktp', formData.ktp[0]);
-        formDataToSend.append('surat_permohonan_bantuan_logistik', formData.surat_permohonan_bantuan_logistik[0]);
-        formDataToSend.append('dokumentasi_bencana', formData.dokumentasi_bencana[0]);
-
         try {
             const token = localStorage.getItem('token');
-            const response = await api.post('/admin-upload-bantuan-logistik', formDataToSend, {
+            if (!token) {
+                console.error('User token not found');
+                return;
+            }
+    
+            const formData = new FormData();
+            const fields = ['ktp', 'surat_permohonan_bantuan_logistik', 'dokumentasi_bencana'];
+            fields.forEach(field => {
+                selectedData[field].forEach(file => {
+                    formData.append(field, file);
+                });
+            });
+
+            // Append the jumlah terdampak
+            formData.append('jml_tedampak', selectedData.jml_tedampak);
+            formData.append('NIK', selectedData.NIK);
+    
+            const config = {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
                 }
-            });
-            console.log("Data submitted successfully:", response.data);
+            };
+    
+            const response = await api.post('/admin-upload-bantuan-logistik', formData, config);
+            console.log(response.data);
+
+            // Show success alert
             Swal.fire({
-                title: "Good job!",
-                text: "Data berhasil dikirim!",
-                icon: "success"
-            });
+                icon: "success",
+                title: "Data Berhasil Diupload",
+                showDenyButton: false,
+                showCancelButton: false,
+                confirmButtonText: "OK",
+                denyButtonText: `Don't save`,
+                text: "Klik ok",
+            })
             navigate('/admin/layanan/bantuan-logistik');
         } catch (error) {
             console.error("Error submitting form data:", error);
@@ -106,8 +141,9 @@ function FormAdminBantuanLogistik() {
                     label="NIK"
                     name="NIK"
                     placeholder="Masukkan NIK"
-                    value={formData.NIK}
+                    value={selectedData.NIK}
                     onChange={handleChange}
+                    error={errors.NIK}
                 />
                 <div>
                     <div className="btn btn-primary" onClick={handleKirimNIK} style={{fontSize: '.9rem', marginTop: '-8px'}}>Pilih</div>
@@ -118,7 +154,16 @@ function FormAdminBantuanLogistik() {
                 name="namaLengkap"
                 col="col-lg-6"
                 placeholder="Nama Lengkap"
-                value={formData.namaLengkap}
+                value={selectedData.namaLengkap}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Jenis Kelamin"
+                name="gender"
+                col="col-lg-6"
+                placeholder="Jenis Kelamin"
+                value={selectedData.gender}
                 onChange={handleChange}
                 disabled
             />
@@ -127,7 +172,7 @@ function FormAdminBantuanLogistik() {
                 name="alamat"
                 col="col-lg-6"
                 placeholder="Alamat"
-                value={formData.alamat}
+                value={selectedData.alamat}
                 onChange={handleChange}
                 disabled
             />
@@ -136,7 +181,7 @@ function FormAdminBantuanLogistik() {
                 name="kecamatan"
                 col="col-lg-6"
                 placeholder="Kecamatan"
-                value={formData.kecamatan}
+                value={selectedData.kecamatan}
                 onChange={handleChange}
                 disabled
             />
@@ -145,7 +190,7 @@ function FormAdminBantuanLogistik() {
                 name="kelurahan"
                 col="col-lg-6"
                 placeholder="Kelurahan"
-                value={formData.kelurahan}
+                value={selectedData.kelurahan}
                 onChange={handleChange}
                 disabled
             />
@@ -154,7 +199,25 @@ function FormAdminBantuanLogistik() {
                 name="rt"
                 col="col-lg-6"
                 placeholder="RT"
-                value={formData.rt}
+                value={selectedData.rt}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pendidikan Terakhir"
+                name="pendidikan"
+                col="col-lg-6"
+                placeholder="Pendidikan Terakhir"
+                value={selectedData.pendidikan}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pekerjaan"
+                name="pekerjaan"
+                col="col-lg-6"
+                placeholder="Pekerjaan"
+                value={selectedData.pekerjaan}
                 onChange={handleChange}
                 disabled
             />
@@ -163,7 +226,7 @@ function FormAdminBantuanLogistik() {
                 name="email"
                 col="col-lg-6"
                 placeholder="Email"
-                value={formData.email}
+                value={selectedData.email}
                 onChange={handleChange}
                 disabled
             />
@@ -172,7 +235,7 @@ function FormAdminBantuanLogistik() {
                 name="noTelepon"
                 col="col-lg-6"
                 placeholder="No. Telepon"
-                value={formData.noTelepon}
+                value={selectedData.noTelepon}
                 onChange={handleChange}
                 disabled
             />
@@ -180,24 +243,33 @@ function FormAdminBantuanLogistik() {
             <InputFile
                 label="KTP"
                 name="ktp"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('ktp', Array.from(e.target.files))}
+                error={errors.ktp}
             />
             <InputFile
                 label="Surat Permohonan Bantuan Logistik"
                 name="surat_permohonan_bantuan_logistik"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('surat_permohonan_bantuan_logistik', Array.from(e.target.files))}
+                error={errors.surat_permohonan_bantuan_logistik}
             />
             <InputFile
                 label="Dokumentasi Kejadian Bencana"
                 name="dokumentasi_bencana"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('dokumentasi_bencana', Array.from(e.target.files))}
+                error={errors.dokumentasi_bencana}
             />
             <InputNumber
                 label="Jumlah Terdampak"
                 name="jml_tedampak"
                 placeholder="Jumlah Terdampak"
-                value={formData.jml_tedampak}
-                onChange={(name, value) => setFormData({ ...formData, [name]: value })}
+                value={selectedData.jml_tedampak}
+                onChange={(name, value) => {
+                    setFormData({ ...selectedData, [name]: value });
+                    const newErrors = { ...errors };
+                    delete newErrors[name];
+                    setErrors(newErrors);
+                }}
+                error={errors.jml_tedampak}
             />
             <div className="text-end mt-3">
                 <div className="btn btn-primary" onClick={handleSubmit} style={{fontSize: '.9rem'}}>Kirim</div>

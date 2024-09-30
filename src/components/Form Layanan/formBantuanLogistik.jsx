@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import InputFile from "../../components/Input Field/inputFile";
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import InputFieldLog from '../Input Field/inputFieldLog';
 import { useNavigate } from 'react-router-dom';
 import TextAreaLog from '../Input Field/textAreaLog';
@@ -9,15 +9,25 @@ import Swal from 'sweetalert2';
 import InputNumber from '../Input Field/inputNumber';
 import { useParams } from "react-router-dom";
 
-function FormBantuanLogistik({ disabled }) {
+function FormBantuanLogistik() {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const navigate = useNavigate();
-    const [ktpFile, setKtpFile] = useState(null);
     const [jmlTerdampak, setJmlTerdampak] = useState('');
-    const [suratPermohonanFile, setSuratPermohonanFile] = useState(null);
-    const [dokumentasiBencanaFile, setDokumentasiBencanaFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        surat_permohonan_bantuan_logistik: [],
+        dokumentasi_bencana: [],
+    });
     const layanan = 'lay_bantuan_logistik'
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,13 +54,28 @@ function FormBantuanLogistik({ disabled }) {
     }, [nopel]);
 
     const handleUpdate = async () => {
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        const isFieldFilled = typeof jmlTerdampak === 'string' ? jmlTerdampak.trim() !== '' : jmlTerdampak !== '';
+
+        if (!hasFiles && !isFieldFilled) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+    
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('jml_tedampak', jmlTerdampak);
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (suratPermohonanFile) formData.append('surat_permohonan_bantuan_logistik', suratPermohonanFile);
-        if (dokumentasiBencanaFile) formData.append('dokumentasi_bencana', dokumentasiBencanaFile);
-
+    
         try {
             const token = localStorage.getItem('token');
             const response = await api.put(`/update-bantuan-logistik/${data.no_lay}`, formData, {
@@ -68,27 +93,40 @@ function FormBantuanLogistik({ disabled }) {
             });
         } catch (error) {
             console.error('Error updating data:', error);
-            alert('Terjadi kesalahan saat memperbarui data');
+            Swal.fire({
+                title: "Gagal mengupdate data",
+                text: "Terjadi kesalahan saat memperbarui data",
+                icon: "error"
+            });
         }
     };
+    
     
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
-                responseType: 'blob'
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            const fileName = 'files.zip';
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${layanan}/${data.id}/product`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -104,7 +142,7 @@ function FormBantuanLogistik({ disabled }) {
             });
             setData(null);
             localStorage.removeItem('selectedPengajuan');
-            Swal.fire("Berhasil dihapus!", "", "success");
+            Swal.fire("Berhasil dibatalkan!", "", "success");
             navigate('/bantuan-logistik');
         } catch (error) {
             console.error('Error deleting data:', error);
@@ -142,7 +180,7 @@ function FormBantuanLogistik({ disabled }) {
             title: "Apakah Anda yakin untuk membatalkan pengajuan?",
             showDenyButton: false,
             showCancelButton: true,
-            confirmButtonText: "Iya",
+            confirmButtonText: "Iya, batalkan",
             icon: 'question',
             confirmButtonColor: "#d33",
         }).then((result) => {
@@ -190,45 +228,42 @@ function FormBantuanLogistik({ disabled }) {
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
                     <InputFile
-                        id="ktp"
                         name="ktp"
                         label="KTP"
-                        disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        disabled={ status !== "Menunggu Validasi"}
+                        id={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
-                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="surat_permohonan_bantuan_logistik"
                         name="surat_permohonan_bantuan_logistik"
                         label="Surat Permohonan Bantuan Logistik"
-                        disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        disabled={ status !== "Menunggu Validasi"}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setSuratPermohonanFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="dokumentasi_bencana"
                         name="dokumentasi_bencana"
-                        label="Akta Kematian"
-                        disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        label="Dokumentasi Bencana"
+                        disabled={ status !== "Menunggu Validasi"}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setDokumentasiBencanaFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputNumber
                         name="jml_tedampak"
                         placeholder="Masukkan jumlah"
-                        disabled={disabled || status !== "Menunggu Validasi"}
+                        disabled={ status !== "Menunggu Validasi"}
                         value={jmlTerdampak}
                         onChange={(name, value) => setJmlTerdampak(value)}
                         label="Jumlah Terdampak"
                     />
-                    {!disabled && (
+                    {/* {!disabled && ( */}
                         <div className="mt-3 text-end">
                             {status === "Menunggu Validasi" && (
                                 <>
@@ -246,19 +281,11 @@ function FormBantuanLogistik({ disabled }) {
                                 </button>
                             )}
                         </div>
-                    )}
+                    {/* )} */}
                 </>
             )}
         </>
     );
 }
-
-FormBantuanLogistik.propTypes = {
-    disabled: PropTypes.bool
-};
-
-FormBantuanLogistik.defaultProps = {
-    disabled: false
-};
 
 export default FormBantuanLogistik;

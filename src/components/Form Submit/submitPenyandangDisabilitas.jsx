@@ -95,12 +95,7 @@ function SubmitPenyandangDisabilitas({ disabled = false }) {
                 confirmButtonText: "OK",
                 denyButtonText: `Don't save`,
                 text: "Klik ok",
-            }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
-            });
+            })
         } catch (error) {
             console.error('Error uploading data:', error);
         }
@@ -111,7 +106,7 @@ function SubmitPenyandangDisabilitas({ disabled = false }) {
             <InputFile
                 id="ktp"
                 name="ktp"
-                label='KTP'
+                label='KTP Pemohon'
                 disabled={disabled}
                 showDownloadButton={false}
                 onChange={(e) => handleFileChange('ktp', Array.from(e.target.files))}
@@ -120,7 +115,7 @@ function SubmitPenyandangDisabilitas({ disabled = false }) {
             <InputFile
                 id="identitas_anak"
                 name="identitas_anak"
-                label='Identitas Anak'
+                label='Identitas Penyandang Disabilitas'
                 disabled={disabled}
                 showDownloadButton={false}
                 onChange={(e) => handleFileChange('identitas_anak', Array.from(e.target.files))}

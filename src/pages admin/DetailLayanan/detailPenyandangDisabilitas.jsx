@@ -10,16 +10,32 @@ function DetailPenyandangDisabilitas() {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const [status, setStatus] = useState("Tidak Diketahui");
-    const [ktpFile, setKtpFile] = useState(null);
-    const [identitasFile, setIdentitasFile] = useState(null);
-    const [kkFile, setKKFile] = useState(null);
-    const [bpjsFile, setBPJSFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        identitas_anak: [],
+        kk: [],
+        bpjs: [],
+        product: [],
+    });
     const [reason, setReason] = useState('');
-    const [product, setProduct] = useState(null);
     const [reasonFromDB, setReasonFromDB] = useState('');
     const [kebutuhan, setKebutuhan] = useState('');
     const [jenisDis, setJenisDis] = useState('');
     const layanan = 'lay_penyandang_disabilitas';
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
+
+    const getRole = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return user.role;
+    };
+    const role = getRole();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -63,31 +79,31 @@ function DetailPenyandangDisabilitas() {
     };
 
     const handleUpdate = async () => {
-        if (reason.trim() === "" && reasonFromDB) {
-            alert("Field Alasan harus diisi untuk memperbarui data alasan.");
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        const isFieldFilled = [
+            kebutuhan,
+            jenisDis
+        ].some(field => typeof field === 'string' ? field.trim() !== '' : field !== '');
+        
+        if (!hasFiles && !isFieldFilled) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
         let formData = new FormData();
-        formData.append('id', data.id);
-        formData.append('jns_disabilitas', jenisDis);
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('kebutuhan', kebutuhan);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (identitasFile) formData.append('identitas_anak', identitasFile);
-        if (kkFile) formData.append('kk', kkFile);
-        if (bpjsFile) formData.append('bpjs', bpjsFile);
-        if (product) formData.append('product', product);
-
-        // Jika ada alasan baru yang diinputkan, tambahkan ke FormData
-        if (reason.trim() !== "") {
-            formData.append('reason', reason.trim());
-        } else if (reasonFromDB) {
-            // Jika tidak, tambahkan alasan dari database
-            formData.append('reason', reasonFromDB);
-        } else {
-            // Jika tidak ada alasan yang baru dan tidak ada alasan di database, beri nilai kosong
-            formData.append('reason', '');
-        }
+        formData.append('jns_disabilitas', jenisDis);
+        formData.append('id', data.id);
 
         try {
             const token = localStorage.getItem('token');
@@ -131,7 +147,7 @@ function DetailPenyandangDisabilitas() {
             setStatus("Berkas Diproses");
 
             const notifResponse = await api.post('/notifikasi', {
-                user_id: data.user_id,
+                user_nik: data.user_nik,
                 no_lay: data.no_lay,
                 layanan: "penyandang-disabilitas",
                 type_message: 1
@@ -161,11 +177,12 @@ function DetailPenyandangDisabilitas() {
             });
             return;
         }
-        if (product) {
+        
+        if (files.product.length !== 0) {
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "Field Produk Layanan harus kosong sebelum menolak data.",
+                text: "Field Produk Layanan harus kosong!",
             });
             return;
         }
@@ -184,7 +201,7 @@ function DetailPenyandangDisabilitas() {
             setStatus("Berkas Tidak Valid");
 
             const notifResponse = await api.post('/notifikasi', {
-                user_id: data.user_id,
+                user_nik: data.user_nik,
                 no_lay: data.no_lay,
                 layanan: "penyandang-disabilitas",
                 type_message: typeMessage
@@ -206,14 +223,15 @@ function DetailPenyandangDisabilitas() {
     };
 
     const handleAccept = async () => {
-        if (!product) {
+        if (files.product.length === 0) {
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "Field Produk Layanan harus diisi untuk menerima data.",
+                text: "File Produk Layanan harus diunggah untuk menerima data.",
             });
             return;
         }
+
         if (reason.trim() !== "") {
             Swal.fire({
                 icon: "error",
@@ -223,9 +241,16 @@ function DetailPenyandangDisabilitas() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('accept_at', new Date().toISOString());
-        formData.append('product', product);
+        let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
+        formData.append('id', data.id);
+
+        const currentDate = new Date().toISOString();
+        formData.append('accept_at', currentDate);
 
         try {
             const token = localStorage.getItem('token');
@@ -239,7 +264,7 @@ function DetailPenyandangDisabilitas() {
             setStatus("Diterima");
 
             const notifResponse = await api.post('/notifikasi', {
-                user_id: data.user_id,
+                user_nik: data.user_nik,
                 no_lay: data.no_lay,
                 layanan: "penyandang-disabilitas",
                 type_message: 3
@@ -417,37 +442,37 @@ function DetailPenyandangDisabilitas() {
                 label="KTP"
                 name="ktp"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setKtpFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Identitas Anak"
                 name="identitas_anak"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setIdentitasFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Kartu Keluarga (KK)"
                 name="kk"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setKKFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="BPJS KIS"
                 name="bpjs"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setBPJSFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFieldLog
                 label="Jenis Disabilitas"
@@ -456,7 +481,7 @@ function DetailPenyandangDisabilitas() {
                 col='col-lg-6'
                 value={jenisDis}
                 onChange={(e) => setJenisDis(e.target.value)}
-                disabled={status !== "Menunggu Validasi"}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <TextAreaLog
                 label="Apa yang Dibutuhkan"
@@ -465,10 +490,12 @@ function DetailPenyandangDisabilitas() {
                 col='col-lg-6'
                 value={kebutuhan}
                 onChange={(e) => setKebutuhan(e.target.value)}
-                disabled={status !== "Menunggu Validasi"}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
-            <h6 className="mt-4">Respon</h6>
-            {(status === "Menunggu Validasi" || status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Berkas Diproses") && (
+            {((role === 3 && (status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Diterima")) || (role === 1 && (status === "Menunggu Validasi" || status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Berkas Diproses" || status === "Diterima"))) && (
+                <h6 className="mt-4">Respon</h6>
+            )}
+            {((role === 3 && (status === "Ditolak" || status === "Berkas Tidak Valid")) || (role === 1 && (status === "Menunggu Validasi" || status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Berkas Diproses"))) && (
                 <TextAreaLog
                     label="Alasan"
                     name="reason"
@@ -476,38 +503,42 @@ function DetailPenyandangDisabilitas() {
                     placeholder="Masukkan Alasan"
                     value={reason || reasonFromDB}
                     onChange={(e) => setReason(e.target.value)}
+                    disabled={role === 3}
                 />
             )}
-            {(status === "Berkas Diproses" || status === "Diterima") && (
+            {((role === 3 && status === "Diterima") || (role === 1 && (status === "Berkas Diproses" || status === "Diterima"))) && (
                 <InputFile
                     label="Produk Layanan"
                     name="product"
-                    filePath={data && data.id ? data.id : ''}
+                    id={data && data.id ? data.id : ''}
                     table={layanan}
-                    onChange={(e) => setProduct(e.target.files[0])}
+                    onChange={handleFileChange}
                     showDownloadButton={status === "Diterima"}
+                    disabled={role === 3}
                 />
             )}
-            <div className="text-end mt-3">
-                {status === "Menunggu Validasi" && (
-                    <>
-                        <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertInvalid}>Tidak Valid</div>
-                        <div className="btn btn-success me-2" style={{ fontSize: '.9rem' }} onClick={showAlertValid}>Data Valid</div>
-                        <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
-                    </>
-                )}
-                {(status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Diterima") && (
-                    <>
-                        <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
-                    </>
-                )}
-                {status === "Berkas Diproses" && (
-                    <>
-                        <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertReject}>Tolak</div>
-                        <div className="btn btn-success" style={{ fontSize: '.9rem' }} onClick={showAlertAccept}>Terima</div>
-                    </>
-                )}
-            </div>
+            {role !== 3 && (
+                <div className="text-end mt-3">
+                    {status === "Menunggu Validasi" && (
+                        <>
+                            <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertInvalid}>Tidak Valid</div>
+                            <div className="btn btn-success me-2" style={{ fontSize: '.9rem' }} onClick={showAlertValid}>Data Valid</div>
+                            <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
+                        </>
+                    )}
+                    {(status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Diterima") && (
+                        <>
+                            <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
+                        </>
+                    )}
+                    {status === "Berkas Diproses" && (
+                        <>
+                            <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertReject}>Tolak</div>
+                            <div className="btn btn-success" style={{ fontSize: '.9rem' }} onClick={showAlertAccept}>Terima</div>
+                        </>
+                    )}
+                </div>
+            )}
         </>
     );
 }

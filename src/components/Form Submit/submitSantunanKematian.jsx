@@ -86,12 +86,7 @@ function SubmitSantunanKematian({ disabled = false }) {
                 confirmButtonText: "OK",
                 denyButtonText: `Don't save`,
                 text: "Klik ok",
-            }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
-            });
+            })
         } catch (error) {
             console.error('Error uploading data:', error);
         }
@@ -102,7 +97,7 @@ function SubmitSantunanKematian({ disabled = false }) {
             <InputFile
                 id="ktp"
                 name="ktp"
-                label='KTP'
+                label='KTP Pemohon'
                 disabled={disabled}
                 showDownloadButton={false}
                 onChange={(e) => handleInputChange('ktp', Array.from(e.target.files))}

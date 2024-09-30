@@ -10,20 +10,36 @@ function DetailSIO() {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const [status, setStatus] = useState("Tidak Diketahui");
-    const [ktpFile, setKtpFile] = useState(null);
-    const [suratPermohonanFile, setSuratPermohonanFile] = useState(null);
-    const [aktaFile, setAktaFile] = useState(null);
-    const [adartFile, setAdartFile] = useState(null);
-    const [strukturFile, setStrukturFile] = useState(null);
-    const [domisiliFIle, setDomisiliFile] = useState(null);
-    const [biodataFile, setBiodataFile] = useState(null);
-    const [prokerFile, setProkerFile] = useState(null);
-    const [npwpFile, setNPWPFile] = useState(null);
-    const [sktFile, setSKTFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        surat_permohonan_pengajuan_lks: [],
+        akta_notaris_pendirian: [],
+        adart: [],
+        struktur_organisasi: [],
+        suket_domisili: [],
+        biodata: [],
+        proker: [],
+        npwp: [],
+        skt: [],
+        product: [],
+    });
     const [reason, setReason] = useState('');
-    const [product, setProduct] = useState(null);
     const [reasonFromDB, setReasonFromDB] = useState('');
     const layanan = 'lay_sio';
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
+
+    const getRole = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return user.role;
+    };
+    const role = getRole();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -64,24 +80,25 @@ function DetailSIO() {
     };
 
     const handleUpdate = async () => {
-        if (reason.trim() === "" && reasonFromDB) {
-            alert("Field Alasan harus diisi untuk memperbarui data alasan.");
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        
+        if (!hasFiles) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (suratPermohonanFile) formData.append('surat_permohonan_pengajuan_lks', suratPermohonanFile);
-        if (aktaFile) formData.append('akta_notaris_pendirian', aktaFile);
-        if (adartFile) formData.append('adart', adartFile);
-        if (strukturFile) formData.append('struktur_organisasi', strukturFile);
-        if (domisiliFIle) formData.append('suket_domisili', domisiliFIle);
-        if (biodataFile) formData.append('biodata', biodataFile);
-        if (prokerFile) formData.append('proker', prokerFile);
-        if (npwpFile) formData.append('npwp', npwpFile);
-        if (sktFile) formData.append('skt', sktFile);
-        if (product) formData.append('product', product);
 
         // Jika ada alasan baru yang diinputkan, tambahkan ke FormData
         if (reason.trim() !== "") {
@@ -136,7 +153,7 @@ function DetailSIO() {
             setStatus("Berkas Diproses");
 
             const notifResponse = await api.post('/notifikasi', {
-                user_id: data.user_id,
+                user_nik: data.user_nik,
                 no_lay: data.no_lay,
                 layanan: "SIO",
                 type_message: 1
@@ -166,11 +183,12 @@ function DetailSIO() {
             });
             return;
         }
-        if (product) {
+        
+        if (files.product.length !== 0) {
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "Field Produk Layanan harus kosong sebelum menolak data.",
+                text: "Field Produk Layanan harus kosong!",
             });
             return;
         }
@@ -189,7 +207,7 @@ function DetailSIO() {
             setStatus("Berkas Tidak Valid");
 
             const notifResponse = await api.post('/notifikasi', {
-                user_id: data.user_id,
+                user_nik: data.user_nik,
                 no_lay: data.no_lay,
                 layanan: "SIO",
                 type_message: typeMessage
@@ -211,14 +229,15 @@ function DetailSIO() {
     };
 
     const handleAccept = async () => {
-        if (!product) {
+        if (files.product.length === 0) {
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "Field Produk Layanan harus diisi untuk menerima data.",
+                text: "File Produk Layanan harus diunggah untuk menerima data.",
             });
             return;
         }
+
         if (reason.trim() !== "") {
             Swal.fire({
                 icon: "error",
@@ -228,9 +247,16 @@ function DetailSIO() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('accept_at', new Date().toISOString());
-        formData.append('product', product);
+        let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
+        formData.append('id', data.id);
+
+        const currentDate = new Date().toISOString();
+        formData.append('accept_at', currentDate);
 
         try {
             const token = localStorage.getItem('token');
@@ -244,7 +270,7 @@ function DetailSIO() {
             setStatus("Diterima");
 
             const notifResponse = await api.post('/notifikasi', {
-                user_id: data.user_id,
+                user_nik: data.user_nik,
                 no_lay: data.no_lay,
                 layanan: "SIO",
                 type_message: 3
@@ -422,94 +448,96 @@ function DetailSIO() {
                 label="KTP"
                 name="ktp"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setKtpFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Surat Permohonan Pengajuan LKS"
                 name="surat_permohonan_pengajuan_lks"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setSuratPermohonanFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Akta Notaris Pendirian"
                 name="akta_notaris_pendirian"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setAktaFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Anggaran Dasar dan Anggaran Rumah Tangga"
                 name="adart"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setAdartFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Struktur Organisasi"
                 name="struktur_organisasi"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setStrukturFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Surat Keterangan Domisili"
                 name="suket_domisili"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setDomisiliFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Biodata"
                 name="biodata"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setBiodataFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="Program Kerja"
                 name="proker"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setProkerFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="NPWP"
                 name="npwp"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setNPWPFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
             <InputFile
                 label="SKT"
                 name="skt"
                 showDownloadButton
-                filePath={data && data.id ? data.id : ''}
+                id={data && data.id ? data.id : ''}
                 table={layanan}
-                onChange={(e) => setSKTFile(e.target.files[0])}
-                disabled={status !== "Menunggu Validasi"}
+                onChange={handleFileChange}
+                disabled={role === 3 || status !== "Menunggu Validasi"}
             />
-            <h6 className="mt-4">Respon</h6>
-            {(status === "Menunggu Validasi" || status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Berkas Diproses") && (
+            {((role === 3 && (status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Diterima")) || (role === 1 && (status === "Menunggu Validasi" || status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Berkas Diproses" || status === "Diterima"))) && (
+                <h6 className="mt-4">Respon</h6>
+            )}
+            {((role === 3 && (status === "Ditolak" || status === "Berkas Tidak Valid")) || (role === 1 && (status === "Menunggu Validasi" || status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Berkas Diproses"))) && (
                 <TextAreaLog
                     label="Alasan"
                     name="reason"
@@ -517,38 +545,42 @@ function DetailSIO() {
                     placeholder="Masukkan Alasan"
                     value={reason || reasonFromDB}
                     onChange={(e) => setReason(e.target.value)}
+                    disabled={role === 3}
                 />
             )}
-            {(status === "Berkas Diproses" || status === "Diterima") && (
+            {((role === 3 && status === "Diterima") || (role === 1 && (status === "Berkas Diproses" || status === "Diterima"))) && (
                 <InputFile
                     label="Produk Layanan"
                     name="product"
-                    filePath={data && data.id ? data.id : ''}
+                    id={data && data.id ? data.id : ''}
                     table={layanan}
-                    onChange={(e) => setProduct(e.target.files[0])}
+                    onChange={handleFileChange}
                     showDownloadButton={status === "Diterima"}
+                    disabled={role === 3}
                 />
             )}
-            <div className="text-end mt-3">
-                {status === "Menunggu Validasi" && (
-                    <>
-                        <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertInvalid}>Tidak Valid</div>
-                        <div className="btn btn-success me-2" style={{ fontSize: '.9rem' }} onClick={showAlertValid}>Data Valid</div>
-                        <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
-                    </>
-                )}
-                {(status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Diterima") && (
-                    <>
-                        <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
-                    </>
-                )}
-                {status === "Berkas Diproses" && (
-                    <>
-                        <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertReject}>Tolak</div>
-                        <div className="btn btn-success" style={{ fontSize: '.9rem' }} onClick={showAlertAccept}>Terima</div>
-                    </>
-                )}
-            </div>
+            {role !== 3 && (
+                <div className="text-end mt-3">
+                    {status === "Menunggu Validasi" && (
+                        <>
+                            <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertInvalid}>Tidak Valid</div>
+                            <div className="btn btn-success me-2" style={{ fontSize: '.9rem' }} onClick={showAlertValid}>Data Valid</div>
+                            <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
+                        </>
+                    )}
+                    {(status === "Ditolak" || status === "Berkas Tidak Valid" || status === "Diterima") && (
+                        <>
+                            <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
+                        </>
+                    )}
+                    {status === "Berkas Diproses" && (
+                        <>
+                            <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertReject}>Tolak</div>
+                            <div className="btn btn-success" style={{ fontSize: '.9rem' }} onClick={showAlertAccept}>Terima</div>
+                        </>
+                    )}
+                </div>
+            )}
         </>
     );
 }

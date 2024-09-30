@@ -9,7 +9,10 @@ function SubmitRumahSinggah({ disabled = false }) {
         ktp: [],
         surat_rujukan: [],
         identitas_pmks: [],
-        identitas_pelapor: []
+        identitas_pelapor: [],
+        berita_acara: [],
+        surat_pernyataan: [],
+        foto: [],
     });
     const [userNIK, setUserNIK] = useState(null);
     const [errors, setErrors] = useState({});
@@ -30,7 +33,7 @@ function SubmitRumahSinggah({ disabled = false }) {
 
     const validateInputs = () => {
         const newErrors = {};
-        const requiredFields = ['ktp', 'surat_rujukan', 'identitas_pmks', 'identitas_pelapor'];
+        const requiredFields = ['ktp', 'surat_rujukan', 'identitas_pmks', 'identitas_pelapor', 'berita_acara', 'surat_pernyataan', 'foto'];
         for (const field of requiredFields) {
             if (selectedData[field].length === 0) newErrors[field] = `${field.toUpperCase()} is required`;
         }
@@ -55,7 +58,7 @@ function SubmitRumahSinggah({ disabled = false }) {
             }
     
             const formData = new FormData();
-            const fields = ['ktp', 'surat_rujukan', 'identitas_pmks', 'identitas_pelapor'];
+            const fields = ['ktp', 'surat_rujukan', 'identitas_pmks', 'identitas_pelapor', 'berita_acara', 'surat_pernyataan', 'foto'];
             fields.forEach(field => {
                 selectedData[field].forEach(file => {
                     formData.append(field, file);
@@ -83,12 +86,7 @@ function SubmitRumahSinggah({ disabled = false }) {
                 confirmButtonText: "OK",
                 denyButtonText: `Don't save`,
                 text: "Klik ok",
-            }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
-            });
+            })
         } catch (error) {
             console.error('Error uploading data:', error);
         }
@@ -99,7 +97,7 @@ function SubmitRumahSinggah({ disabled = false }) {
             <InputFile
                 id="ktp"
                 name="ktp"
-                label='KTP'
+                label='KTP Pemohon'
                 disabled={disabled}
                 showDownloadButton={false}
                 onChange={(e) => handleInputChange('ktp', Array.from(e.target.files))}
@@ -133,6 +131,36 @@ function SubmitRumahSinggah({ disabled = false }) {
                 showDownloadButton={false}
                 onChange={(e) => handleInputChange('identitas_pelapor', Array.from(e.target.files))}
                 error={errors.identitas_pelapor	}
+            />
+            <InputFile
+                id="berita_acara"
+                name="berita_acara"
+                label='Berita Acara Pemohon/Instansi'
+                disabled={disabled}
+                showDownloadButton={false}
+                onChange={(e) => handleInputChange('berita_acara', Array.from(e.target.files))}
+                error={errors.berita_acara}
+            />
+            <InputFile
+                name="surat_pernyataan"
+                label='Surat Pernyataan'
+                disabled={disabled}
+                showDownloadButton={false}
+                onChange={(e) => handleInputChange('surat_pernyataan', Array.from(e.target.files))}
+                error={errors.surat_pernyataan}
+                showTemplateButton={true}
+                id="1"
+                table='template'
+            />
+            <InputFile
+                id="foto"
+                name="foto"
+                label='Foto Kondisi Sekarang'
+                disabled={disabled}
+                showDownloadButton={false}
+                onChange={(e) => handleInputChange('foto', Array.from(e.target.files))}
+                error={errors.foto}
+                
             />
             {!disabled && (
                 <div className="mt-3 text-end">

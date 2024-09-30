@@ -26,6 +26,10 @@ import FormAdminPengaduan from './pages admin/Detail Pengaduan/formPengaduan.jsx
 import InformasiAdminSide from './pages admin/informasi.jsx';
 import FormAdminInformasi from './pages admin/Detail Informasi/formInformasi.jsx';
 import DetailInformasi from './pages admin/Detail Informasi/detailInformasi.jsx';
+import ProfileAdmin from './pages admin/profileAdmin.jsx';
+import Template from './pages admin/template.jsx';
+import moreInfo from './components/Informasi/more-info.jsx';
+import ProtectedKadis from './components/ProtectedRoute/ProtextedKadis.jsx';
 // import FormPengaduan from './components/Form Layanan/formPengaduan.jsx';
 // import FormAdminPengaduan from './components/Form Layanan/formPengaduan.jsx';
 
@@ -38,7 +42,7 @@ function App() {
       <Route path="/lupa-password" element={<LupaPassword />} />
 
       {/* ROUTE USER */}
-      <Route path="/home" element={<Home />} />
+      {/* <Route path="/home" element={<Home />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/notifikasi" element={<Notifikasi />} />
       <Route path="/bantuan-logistik" element={<Lay />} />
@@ -58,8 +62,8 @@ function App() {
       <Route path="/:layanan/detail-pengajuan/:nopel" element={<EditPengajuan />} />
       <Route path="/detail-info/:id" element={<DetailInfo />} />
       <Route path="pengaduan-DSPM/edit-pengaduan/:no_adu" element={<EditPengaduan />} />
-      <Route path="pengaduan-DSPM/detail-pengaduan/:no_adu" element={<EditPengaduan />} />
-      {/* <Route path="/home" element={<ProtectedRoute element={Home} />} />
+      <Route path="pengaduan-DSPM/detail-pengaduan/:no_adu" element={<EditPengaduan />} /> */}
+      <Route path="/home" element={<ProtectedRoute element={Home} />} />
       <Route path="/profile" element={<ProtectedRoute element={Profile} />} />
       <Route path="/notifikasi" element={<ProtectedRoute element={Notifikasi} />} />
       <Route path="/bantuan-logistik" element={<ProtectedRoute element={Lay} />} />
@@ -78,8 +82,9 @@ function App() {
       <Route path="/:layanan/edit-pengajuan/:nopel" element={<ProtectedRoute element={EditPengajuan} />} />
       <Route path="/:layanan/detail-pengajuan/:nopel" element={<ProtectedRoute element={EditPengajuan} />} />
       <Route path="/detail-info/:id" element={<ProtectedRoute element={DetailInfo} />} />
+      <Route path="/informasi" element={<ProtectedRoute element={moreInfo} />} />
       <Route path="pengaduan-DSPM/edit-pengaduan/:no_adu" element={<ProtectedRoute element={EditPengaduan} />} />
-      <Route path="pengaduan-DSPM/detail-pengaduan/:no_adu" element={<ProtectedRoute element={EditPengaduan} />} /> */}
+      <Route path="pengaduan-DSPM/detail-pengaduan/:no_adu" element={<ProtectedRoute element={EditPengaduan} />} />
 
       {/* ROUTE ADMIN */}
       <Route path="/admin/dashboard" element={<ProtectedAdmin element={Dashboard} />} />
@@ -87,6 +92,7 @@ function App() {
       <Route path="/admin/layanan/:layananType/tambah-data" element={<ProtectedAdmin element={TambahData} />} />
       <Route path="/admin/layanan/:layananType/detail/:nopel" element={<ProtectedAdmin element={DetailData} />} />
       <Route path="/admin/layanan/:layananType/edit/:nopel" element={<ProtectedAdmin element={DetailData} />} />
+      <Route path="/admin/layanan/:layananType/template" element={<ProtectedAdmin element={Template} />} />
       <Route path="/admin/pengaduan-DSPM" element={<ProtectedAdmin element={PengaduanAdminSide} />} />
       <Route path="/admin/pengaduan-DSPM/tambah-data" element={<ProtectedAdmin element={FormAdminPengaduan} />} />
       <Route path="/admin/pengaduan-DSPM/detail/:no_adu" element={<ProtectedAdmin element={DetailPengaduan} />} />
@@ -97,6 +103,18 @@ function App() {
       <Route path="/admin/informasi" element={<ProtectedAdmin element={InformasiAdminSide} />} />
       <Route path="/admin/informasi/tambah-informasi" element={<ProtectedAdmin element={FormAdminInformasi} />} />
       <Route path="/admin/informasi/edit/:id" element={<ProtectedAdmin element={DetailInformasi} />} />
+      <Route path="/admin/profile" element={<ProtectedAdmin element={ProfileAdmin} />} />
+
+      {/* ROUTE KADIS */}
+      <Route path="/kadis/dashboard" element={<ProtectedKadis element={Dashboard} />} />
+      <Route path="/kadis/layanan/:layananType" element={<ProtectedKadis element={LayAdminSide} />} />
+      <Route path="/kadis/pengaduan-DSPM" element={<ProtectedKadis element={PengaduanAdminSide} />} />
+      <Route path="/kadis/users" element={<ProtectedKadis element={Users} />} />
+      <Route path="/kadis/informasi" element={<ProtectedKadis element={InformasiAdminSide} />} />
+      <Route path="/kadis/profile" element={<ProtectedKadis element={ProfileAdmin} />} />
+      <Route path="/kadis/users/detail-user/:nik" element={<ProtectedKadis element={DetailUser} />} />
+      <Route path="/kadis/layanan/:layananType/detail/:nopel" element={<ProtectedKadis element={DetailData} />} />
+      <Route path="/kadis/pengaduan-DSPM/detail/:no_adu" element={<ProtectedKadis element={DetailPengaduan} />} />
     </Routes>
   );
 }

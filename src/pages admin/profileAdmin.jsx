@@ -1,14 +1,16 @@
-import '../Form Profile/formProfile.css';
-import AlertLayanan from '../Alert/alertLayanan';
-import InputFieldLog from '../Input Field/inputFieldLog';
-import TextAreaLog from '../Input Field/textAreaLog';
-import OptionFieldLog from '../Input Field/optionFieldLog';
-import PasswordLog from '../Input Field/passwordLog';
+import '../components/Form Profile/formProfile.css';
+import AlertLayanan from '../components/Alert/alertLayanan';
+import InputFieldLog from '../components/Input Field/inputFieldLog';
+import TextAreaLog from '../components/Input Field/textAreaLog';
+import OptionFieldLog from '../components/Input Field/optionFieldLog';
+import PasswordLog from '../components/Input Field/passwordLog';
 import { useState, useEffect } from 'react';
-import apiConfig from '../../config/config';
 import Swal from 'sweetalert2';
+import apiConfig from '../config/config';
+import Topbar from '../components admin/topbar';
+import SidebarAdmin from '../components admin/sidebar';
 
-function FormProfile() {
+function ProfileAdmin() {
     const [selectedKecamatan, setSelectedKecamatan] = useState('');
     const [kelurahanOptions, setKelurahanOptions] = useState([]);
     const [selectedKelurahan, setSelectedKelurahan] = useState('');
@@ -222,116 +224,122 @@ function FormProfile() {
 
     return (
         <>
-            <div className="wrap-prof">
-                <div className="form-profile row rounded border p-4 g-1 g-lg-2" style={{backgroundColor: 'white'}}>
-                    <div className='p-0 d-flex flex-column'>
-                        <h4 className='text-center ubuntu-sans-semibold'>Profile</h4>
-                        <AlertLayanan desc='Pastikan data yang Anda masukkan pada profil sesuai dengan NIK yang tertera pada Kartu Tanda Penduduk (KTP) Anda.' />
+            <div className="overflow-hi wv-100" style={{ backgroundColor: '#f5f5f5' }}>
+                <div className="row m-0">
+                    <div className="col-2 p-0">
+                        <SidebarAdmin />
                     </div>
-                    <InputFieldLog label='NIK' col='col-lg-6' disabled value={userData.NIK} error={errors.NIK} />
-                    <InputFieldLog label="Nama" placeholder="Masukkan Nama" name="nama" col='col-lg-6' value={userData.nama} onChange={handleInputChange} error={errors.nama} />
-                    <OptionFieldLog
-                        label="Jenis Kelamin"
-                        placeholder="Pilih Jenis Kelamin"
-                        options={[
-                            { value: 'Laki-laki', label: 'Laki-laki' },
-                            { value: 'Perempuan', label: 'Perempuan' },
-                        ]}
-                        onChange={(event) => {
-                            setSelectedGender(event.target.value);
-                            setUserData({
-                                ...userData,
-                                gender: event.target.value
-                            });
-                        }}
-                        value={selectedGender}
-                        name="gender"
-                        col='col-lg-6'
-                        error={errors.gender}
-                    />
-                    <TextAreaLog label="Alamat" placeholder="Masukkan Alamat" name="alamat" col='col-lg-6' value={userData.alamat} onChange={handleInputChange} error={errors.alamat} />
-                    <OptionFieldLog
-                        label="Kecamatan"
-                        placeholder="Pilih Kecamatan"
-                        options={[
-                            { value: 'Bontang Barat', label: 'Bontang Barat' },
-                            { value: 'Bontang Selatan', label: 'Bontang Selatan' },
-                            { value: 'Bontang Utara', label: 'Bontang Utara' }
-                        ]}
-                        onChange={handleKecamatanChange}
-                        value={selectedKecamatan}
-                        name="kecamatan"
-                        col='col-lg-6'
-                        error={errors.kecamatan}
-                    />
-                    <OptionFieldLog
-                        label="Kelurahan"
-                        placeholder="Pilih Kelurahan"
-                        options={kelurahanOptions}
-                        value={selectedKelurahan}
-                        onChange={(event) => {
-                            setSelectedKelurahan(event.target.value);
-                            setUserData({
-                                ...userData,
-                                kelurahan: event.target.value
-                            });
-                        }}
-                        name="kelurahan"
-                        col='col-lg-6'
-                        error={errors.kelurahan}
-                    />
-                    <InputFieldLog label="RT" placeholder="Masukkan RT" name="rt" col='col-lg-6' value={userData.rt} onChange={handleInputChange} error={errors.rt} />
-                    <OptionFieldLog
-                        label="Pekerjaan"
-                        placeholder="Pilih Pekerjaan"
-                        options={[
-                            { value: 'PNS', label: 'PNS' },
-                            { value: 'TNI/Polri', label: 'TNI/Polri' },
-                            { value: 'Pegawai Swasta', label: 'Pegawai Swasta' },
-                            { value: 'Wiraswasta', label: 'Wiraswasta' },
-                            { value: 'Pelajar/Mahasiswa', label: 'Pelajar/Mahasiswa' },
-                            { value: 'Lainnya', label: 'Lainnya' },
-                        ]}
-                        onChange={(event) => {
-                            setSelectedPekerjaan(event.target.value);
-                            setUserData({
-                                ...userData,
-                                pekerjaan: event.target.value
-                            });
-                        }}
-                        value={selectedPekerjaan}
-                        name="pekerjaan"
-                        col='col-lg-6'
-                        error={errors.pekerjaan}
-                    />
-                    <OptionFieldLog
-                        label="Pendidikan Terakhir"
-                        placeholder="Pilih Pendidikan Terakhir"
-                        options={[
-                            { value: 'Tidak Sekolah', label: 'Tidak Sekolah' },
-                            { value: 'SD', label: 'SD' },
-                            { value: 'SLTP/sederajat', label: 'SLTP/sederajat' },
-                            { value: 'SLTA/sederajat', label: 'SLTA/sederajat' },
-                            { value: 'D3', label: 'D3' },
-                            { value: 'Sarjana', label: 'Sarjana' },
-                        ]}
-                        onChange={(event) => {
-                            setSelectedPendidikan(event.target.value);
-                            setUserData({
-                                ...userData,
-                                pendidikan: event.target.value
-                            });
-                        }}
-                        value={selectedPendidikan}
-                        name="pendidikan"
-                        col='col-lg-6'
-                        error={errors.pendidikan}
-                    />
-                    <InputFieldLog label="Email" placeholder="Masukkan Email" name="email" col='col-lg-6' value={userData.email} onChange={handleInputChange} error={errors.email} />
-                    <InputFieldLog label="No. Telepon" placeholder="Masukkan No. Telepon" name="no_telp" col='col-lg-6' value={userData.no_telp} onChange={handleInputChange} error={errors.no_telp} />
-                    <PasswordLog label="Password" placeholder="Masukkan Password jika ingin mengganti password baru" name="password" col='col-lg-6' value={userData.password} onChange={handleInputChange} error={errors.password} />
-                    <div className="lg pt-3 text-end">
-                        <div className="btn btn-primary" style={{fontSize: '.9rem'}} onClick={updateUserData}>Update Data</div>
+                    <div className="col-10 p-0 min-vh-100">
+                        <Topbar />
+                        <div className="bg-white m-3 rounded border p-2">
+                            <div className="p-4 row">
+                                <InputFieldLog label='NIK' col='col-lg-6' disabled value={userData.NIK} error={errors.NIK} />
+                                <InputFieldLog label="Nama" placeholder="Masukkan Nama" name="nama" col='col-lg-6' value={userData.nama} onChange={handleInputChange} error={errors.nama} />
+                                <OptionFieldLog
+                                    label="Jenis Kelamin"
+                                    placeholder="Pilih Jenis Kelamin"
+                                    options={[
+                                        { value: 'Laki-laki', label: 'Laki-laki' },
+                                        { value: 'Perempuan', label: 'Perempuan' },
+                                    ]}
+                                    onChange={(event) => {
+                                        setSelectedGender(event.target.value);
+                                        setUserData({
+                                            ...userData,
+                                            gender: event.target.value
+                                        });
+                                    }}
+                                    value={selectedGender}
+                                    name="gender"
+                                    col='col-lg-6'
+                                    error={errors.gender}
+                                />
+                                <TextAreaLog label="Alamat" placeholder="Masukkan Alamat" name="alamat" col='col-lg-6' value={userData.alamat} onChange={handleInputChange} error={errors.alamat} />
+                                <OptionFieldLog
+                                    label="Kecamatan"
+                                    placeholder="Pilih Kecamatan"
+                                    options={[
+                                        { value: 'Bontang Barat', label: 'Bontang Barat' },
+                                        { value: 'Bontang Selatan', label: 'Bontang Selatan' },
+                                        { value: 'Bontang Utara', label: 'Bontang Utara' }
+                                    ]}
+                                    onChange={handleKecamatanChange}
+                                    value={selectedKecamatan}
+                                    name="kecamatan"
+                                    col='col-lg-6'
+                                    error={errors.kecamatan}
+                                />
+                                <OptionFieldLog
+                                    label="Kelurahan"
+                                    placeholder="Pilih Kelurahan"
+                                    options={kelurahanOptions}
+                                    value={selectedKelurahan}
+                                    onChange={(event) => {
+                                        setSelectedKelurahan(event.target.value);
+                                        setUserData({
+                                            ...userData,
+                                            kelurahan: event.target.value
+                                        });
+                                    }}
+                                    name="kelurahan"
+                                    col='col-lg-6'
+                                    error={errors.kelurahan}
+                                />
+                                <InputFieldLog label="RT" placeholder="Masukkan RT" name="rt" col='col-lg-6' value={userData.rt} onChange={handleInputChange} error={errors.rt} />
+                                <OptionFieldLog
+                                    label="Pekerjaan"
+                                    placeholder="Pilih Pekerjaan"
+                                    options={[
+                                        { value: 'PNS', label: 'PNS' },
+                                        { value: 'TNI/Polri', label: 'TNI/Polri' },
+                                        { value: 'Pegawai Swasta', label: 'Pegawai Swasta' },
+                                        { value: 'Wiraswasta', label: 'Wiraswasta' },
+                                        { value: 'Pelajar/Mahasiswa', label: 'Pelajar/Mahasiswa' },
+                                        { value: 'Lainnya', label: 'Lainnya' },
+                                    ]}
+                                    onChange={(event) => {
+                                        setSelectedPekerjaan(event.target.value);
+                                        setUserData({
+                                            ...userData,
+                                            pekerjaan: event.target.value
+                                        });
+                                    }}
+                                    value={selectedPekerjaan}
+                                    name="pekerjaan"
+                                    col='col-lg-6'
+                                    error={errors.pekerjaan}
+                                />
+                                <OptionFieldLog
+                                    label="Pendidikan Terakhir"
+                                    placeholder="Pilih Pendidikan Terakhir"
+                                    options={[
+                                        { value: 'Tidak Sekolah', label: 'Tidak Sekolah' },
+                                        { value: 'SD', label: 'SD' },
+                                        { value: 'SLTP/sederajat', label: 'SLTP/sederajat' },
+                                        { value: 'SLTA/sederajat', label: 'SLTA/sederajat' },
+                                        { value: 'D3', label: 'D3' },
+                                        { value: 'Sarjana', label: 'Sarjana' },
+                                    ]}
+                                    onChange={(event) => {
+                                        setSelectedPendidikan(event.target.value);
+                                        setUserData({
+                                            ...userData,
+                                            pendidikan: event.target.value
+                                        });
+                                    }}
+                                    value={selectedPendidikan}
+                                    name="pendidikan"
+                                    col='col-lg-6'
+                                    error={errors.pendidikan}
+                                />
+                                <InputFieldLog label="Email" placeholder="Masukkan Email" name="email" col='col-lg-6' value={userData.email} onChange={handleInputChange} error={errors.email} />
+                                <InputFieldLog label="No. Telepon" placeholder="Masukkan No. Telepon" name="no_telp" col='col-lg-6' value={userData.no_telp} onChange={handleInputChange} error={errors.no_telp} />
+                                <PasswordLog label="Password" placeholder="Masukkan Password jika ingin mengganti password baru" name="password" col='col-lg-6' value={userData.password} onChange={handleInputChange} error={errors.password} />
+                                <div className="lg pt-3 text-end">
+                                    <div className="btn btn-primary" style={{fontSize: '.9rem'}} onClick={updateUserData}>Update Data</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -339,4 +347,4 @@ function FormProfile() {
     );
 }
 
-export default FormProfile;
+export default ProfileAdmin;

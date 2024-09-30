@@ -1,10 +1,11 @@
 import Footer from "../../components/Footer/footer";
 import CollapsibleExample from "../../components/Navbar/navbar";
 import Wallpaper2 from "../../components/Wallpaper/wallpaper2";
-import { RiProgress1Line } from "react-icons/ri";
 import { useEffect, useState } from 'react';
 import api from "../../components/api";
 import { useNavigate } from "react-router-dom";
+import { LuFileClock, LuFileCheck2, LuFileX2 } from "react-icons/lu";
+import { FiX } from "react-icons/fi";
 
 function Notifikasi() {
     const [notifikasi, setNotifikasi] = useState([]);
@@ -12,8 +13,8 @@ function Notifikasi() {
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
-        const userId = user.id;
-        console.log(userId);
+        const userId = user.NIK;
+
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
@@ -22,8 +23,10 @@ function Notifikasi() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                setNotifikasi(response.data); // Set the notifications data
-                console.log('Data notifikasi yang berhasil diambil:', response.data);
+                // Urutkan data berdasarkan id dari terbesar ke terkecil
+                const sortedData = response.data.sort((a, b) => b.id - a.id);
+                setNotifikasi(sortedData); // Set the notifications data
+                console.log('Data notifikasi yang berhasil diambil:', sortedData);
             } catch (error) {
                 if (error.response && error.response.status === 401) {
                     console.error('Unauthorized: Please log in first.');
@@ -34,6 +37,11 @@ function Notifikasi() {
         };
 
         fetchData();
+
+        // Set interval for polling
+        const intervalId = setInterval(fetchData, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(intervalId); // Cleanup interval on component unmount
     }, []);
 
     const getStatus = (type_message) => {
@@ -65,6 +73,20 @@ function Notifikasi() {
         }
     };
 
+    const handleDelete = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            await api.delete(`/notifikasi/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setNotifikasi(notifikasi.filter(notif => notif.id !== id));
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
     return (
         <>
             <CollapsibleExample />
@@ -80,8 +102,8 @@ function Notifikasi() {
                                 <div key={index} className={`bar-notifikasi border p-4 d-flex justify-content-between ${notif.read_at ? 'bg-white' : 'bg-info-subtle'}`} style={{ cursor: 'pointer' }} onClick={() => handleClick(notif)}>
                                     <div className="d-flex gap-3">
                                         <div className="">
-                                            <div className="logo p-2 rounded-circle bg-primary lh-1">
-                                                <RiProgress1Line size={'18px'} color="white" />
+                                            <div className={`logo p-2 rounded-circle ${notif.type_message === 3 ? 'bg-success' : (notif.type_message === 2 || notif.type_message === 4) ? 'bg-danger' : 'bg-primary'} lh-1`}>
+                                                {notif.type_message === 3 ? <LuFileCheck2 size={'18px'} color="white" /> : (notif.type_message === 2 || notif.type_message === 4) ? <LuFileX2 size={'18px'} color="white" /> : <LuFileClock size={'18px'} color="white" />}
                                             </div>
                                         </div>
                                         <div className="text-black">
@@ -91,11 +113,11 @@ function Notifikasi() {
                                             <p className="ubuntu-sans-regular" style={{ fontSize: '.8rem' }}>{new Date(notif.created_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                    {!notif.read_at && (
-                                        <div className="read">
-                                            <div className="bg-primary p-1 rounded-circle"></div>
+                                    <div className="d-flex">
+                                        <div className="eks" onClick={(e) => { e.stopPropagation(); handleDelete(notif.id); }}>
+                                            <FiX size={'18px'} />
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

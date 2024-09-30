@@ -6,9 +6,11 @@ import "../Navbar/navbar.css"
 import { useState, useEffect } from 'react';
 import { NavLink } from "react-router-dom";
 import Logout from '../logout.jsx';
+import api from "../api";
 
 function CollapsibleExample() {
     const [scrollPosition, setScrollPosition] = useState(0);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -21,6 +23,30 @@ function CollapsibleExample() {
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
+    }, []);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user'));
+                const userId = user.NIK;
+                
+                const response = await api.get(`/notifikasi/${userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                
+                // Check if there's any unread notification
+                const unreadExists = response.data.some(notif => !notif.read_at);
+                setHasUnreadNotifications(unreadExists);
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        };
+
+        fetchNotifications();
     }, []);
 
     return (
@@ -38,7 +64,12 @@ function CollapsibleExample() {
                     <Nav className='d-flex'>
                         <NavLink to="/home" activeclassname='active' className={`ubuntu-sans-medium px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Beranda</NavLink>
                         <NavLink to="/profile" activeclassname='active' className={`ubuntu-sans-medium px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Profile</NavLink>
-                        <NavLink to="/notifikasi" activeclassname='active' className={`ubuntu-sans-medium px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>Notifikasi</NavLink>
+                        <NavLink to="/notifikasi" activeclassname='active' className={`ubuntu-sans-medium position-relative px-0 ms-5 text-decoration-none ${scrollPosition > 0 ? 'text-black' : 'text-white'}`}>
+                            {hasUnreadNotifications && (
+                                <div className="dot-notif rounded-circle bg-danger position-absolute" style={{width: '8px', height: '8px'}}></div>
+                            )}
+                            Notifikasi
+                        </NavLink>
                         <Logout />
                     </Nav>
                 </Navbar.Collapse>

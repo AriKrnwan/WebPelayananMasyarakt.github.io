@@ -20,6 +20,12 @@ function DetailPengaduan() {
     const [jawabanFormDB, setJawabanFromDB] = useState('');
     const layanan = 'pengaduan';
 
+    const getRole = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return user.role;
+    };
+    const role = getRole();
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -286,7 +292,7 @@ function DetailPengaduan() {
                                     placeholder="Masukkan Masalah"
                                     value={masalah}
                                     onChange={(e) => setMasalah(e.target.value)}
-                                    disabled={status !== "Belum Dijawab"}
+                                    disabled={role === 3 || status !== "Belum Dijawab"}
                                 />
                                 <TextAreaLog
                                     label="Harapan"
@@ -295,33 +301,40 @@ function DetailPengaduan() {
                                     placeholder="Masukkan Harapan"
                                     value={harapan}
                                     onChange={(e) => setHarapan(e.target.value)}
-                                    disabled={status !== "Belum Dijawab"}
+                                    disabled={role === 3 || status !== "Belum Dijawab"}
                                 />
                                 <InputFile
                                     label="Foto"
                                     name="foto"
                                     showDownloadButton
-                                    filePath={data && data.id ? data.id : ''}
+                                    id={data && data.id ? data.id : ''}
                                     table={layanan}
                                     onChange={(e) => setFotoFile(e.target.files[0])}
-                                    disabled={status !== "Belum Dijawab"}
+                                    disabled={role === 3 || status !== "Belum Dijawab"}
                                 />
-                                <h6 className="mt-4">Respon</h6>
-                                <TextAreaLog
-                                    label="Jawaban"
-                                    name="jawaban"
-                                    col="col-lg-6"
-                                    placeholder="Masukkan Jawaban"
-                                    value={jawaban || jawabanFormDB}
-                                    onChange={(e) => setJawaban(e.target.value)}
-                                />
-                                <div className="text-end mt-3">
-                                    <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertHapus}>Hapus Data</div>
-                                    {status === "Belum Dijawab" && (
-                                        <div className="btn btn-success me-2" style={{ fontSize: '.9rem' }} onClick={showAlertJawab}>Jawab</div>
-                                    )}
-                                    <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
-                                </div>
+                                {((role === 3 && status === "Dijawab") || (role === 1)) && (
+                                    <h6 className="mt-4">Respon</h6>
+                                )}
+                                {((role === 3 && status === "Dijawab") || (role === 1)) && (
+                                    <TextAreaLog
+                                        label="Jawaban"
+                                        name="jawaban"
+                                        col="col-lg-6"
+                                        placeholder="Masukkan Jawaban"
+                                        value={jawaban || jawabanFormDB}
+                                        onChange={(e) => setJawaban(e.target.value)}
+                                        disabled={role === 3}
+                                    />
+                                )}
+                                {role !== 3 && (
+                                    <div className="text-end mt-3">
+                                        <div className="btn btn-danger me-2" style={{ fontSize: '.9rem' }} onClick={showAlertHapus}>Hapus Data</div>
+                                        {status === "Belum Dijawab" && (
+                                            <div className="btn btn-success me-2" style={{ fontSize: '.9rem' }} onClick={showAlertJawab}>Jawab</div>
+                                        )}
+                                        <div className="btn btn-primary" style={{ fontSize: '.9rem' }} onClick={handleUpdate}>Update</div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

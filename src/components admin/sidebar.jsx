@@ -3,47 +3,114 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { FiGrid, FiUser, FiFolder } from "react-icons/fi";
 import { IoIosArrowDown } from "react-icons/io";
 import './admin.css';
+import api from '../components/api';
+import LogoPemkot from "../assets/images/Logo Pemkot Bontang.svg";
 
 function SidebarAdmin() {
     const [showLayanan, setShowLayanan] = useState(false);
     const [activeItem, setActiveItem] = useState('Dashboard');
     const [selectedLayanan, setSelectedLayanan] = useState(null);
+    const [layananCounts, setLayananCounts] = useState({});
     const location = useLocation();
 
+    const getRole = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return user.role;
+    };
+    const role = getRole();
+    const rolePrefix = role === 1 ? '/admin' : role === 3 ? '/kadis' : '';
+
+    useEffect(() => {
+        const layananItems = [
+            'bantuan-logistik',
+            'santunan-kematian',
+            'SKT',
+            'SIO',
+            'pengumpulan-uang-dan-barang',
+            'rumah-singgah',
+            'rehabilitasi-lansia',
+            'rehabilitasi-anak-terlantar',
+            'penyandang-disabilitas',
+            'pengangkatan-anak',
+            'DTKS',
+            'PBI-JK'
+        ];
+
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const counts = {};
+
+                for (const layanan of layananItems) {
+                    const response = await api.get(`/all-lay-${layanan}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    console.log(`Fetched data for ${layanan}:`, response.data);
+
+                    counts[layanan] = response.data.reduce((acc, item) => {
+                        const status = calculateStatus(item);
+                        if (status === "Menunggu Validasi" || status === "Berkas Diproses") {
+                            acc += 1;
+                        }
+                        return acc;
+                    }, 0);
+                }
+
+                setLayananCounts(counts);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const calculateStatus = (item) => {
+        const { submit_at, valid_at, reject_at, accept_at } = item;
+        if (submit_at && !valid_at && !reject_at && !accept_at) {
+            return "Menunggu Validasi";
+        } else if (submit_at && valid_at && !reject_at && !accept_at) {
+            return "Berkas Diproses";
+        }
+        return "Tidak Diketahui";
+    };
+
     const layananItems = [
-        { name: 'Bantuan Logistik Korban Bencana', count: 198, path: 'bantuan-logistik' },
-        { name: 'Pemberian Santunan Kematian', count: 150, path: 'santunan-kematian' },
-        { name: 'SKT', count: 100, path: 'SKT' },
-        { name: 'SIO', count: 100, path: 'SIO' },
-        { name: 'Pengumpulan Uang dan Barang', count: 100, path: 'pengumpulan-uang-dan-barang' },
-        { name: 'Rumah Singgah', count: 100, path: 'rumah-singgah' },
-        { name: 'Rehabilitasi Sosial Lanjut Usia', count: 100, path: 'rehabilitasi-lansia' },
-        { name: 'Rehabilitasi Sosial Dasar Anak Terlantar', count: 100, path: 'rehabilitasi-anak-terlantar' },
-        { name: 'Penyandang Disabilitas', count: 100, path: 'penyandang-disabilitas' },
-        { name: 'Usulan Calon Pengangkatan Anak', count: 100, path: 'pengangkatan-anak' },
-        { name: 'DTKS', count: 100, path: 'DTKS' },
-        { name: 'PBI-JK', count: 100, path: 'PBI-JK' },
+        { name: 'Bantuan Logistik Korban Bencana', path: 'bantuan-logistik' },
+        { name: 'Pemberian Santunan Kematian', path: 'santunan-kematian' },
+        { name: 'SKT', path: 'SKT' },
+        { name: 'SIO', path: 'SIO' },
+        { name: 'Pengumpulan Uang dan Barang', path: 'pengumpulan-uang-dan-barang' },
+        { name: 'Rumah Singgah', path: 'rumah-singgah' },
+        { name: 'Rehabilitasi Sosial Lanjut Usia', path: 'rehabilitasi-lansia' },
+        { name: 'Rehabilitasi Sosial Dasar Anak Terlantar', path: 'rehabilitasi-anak-terlantar' },
+        { name: 'Penyandang Disabilitas', path: 'penyandang-disabilitas' },
+        { name: 'Usulan Calon Pengangkatan Anak', path: 'pengangkatan-anak' },
+        { name: 'DTKS', path: 'DTKS' },
+        { name: 'PBI-JK', path: 'PBI-JK' },
     ];
 
     useEffect(() => {
         const path = location.pathname;
-        if (path.includes('/admin/dashboard')) {
+        if (path.includes('/admin/dashboard') || path.includes('/kadis/dashboard')) {
             setActiveItem('Dashboard');
             setShowLayanan(false);
-        } else if (path.includes('/admin/users')) {
+        } else if (path.includes('/admin/users') || path.includes('/kadis/users')) {
             setActiveItem('Users');
             setShowLayanan(false);
-        } else if (path.includes('/admin/layanan')) {
+        } else if (path.includes('/admin/layanan') || path.includes('/kadis/layanan')) {
             const layananPath = layananItems.find(item => path.includes(item.path));
             if (layananPath) {
                 setSelectedLayanan(layananPath);
                 setActiveItem(layananPath.name);
-                setShowLayanan(true); // Tetap membuka submenu Layanan ketika salah satu item di dalamnya aktif
+                setShowLayanan(true);
             }
-        } else if (path.includes('/admin/pengaduan-DSPM')) {
+        } else if (path.includes('/admin/pengaduan-DSPM') || path.includes('/kadis/pengaduan-DSPM')) {
             setActiveItem('Pengaduan');
             setShowLayanan(false);
-        } else if (path.includes('/admin/informasi')) {
+        } else if (path.includes('/admin/informasi') || path.includes('/kadis/informasi')) {
             setActiveItem('Informasi');
             setShowLayanan(false);
         }
@@ -56,8 +123,8 @@ function SidebarAdmin() {
     const handleItemClick = (item) => {
         setActiveItem(item);
         if (item !== 'Layanan') {
-            setShowLayanan(false); // Pastikan submenu layanan ditutup saat menu lain dipilih
-            setSelectedLayanan(null); // Reset layanan yang dipilih
+            setShowLayanan(false);
+            setSelectedLayanan(null);
         }
     };
 
@@ -66,20 +133,27 @@ function SidebarAdmin() {
         setActiveItem(layanan.name);
     };
 
+    const totalLayananCount = Object.values(layananCounts).reduce((acc, count) => acc + count, 0);
+
     return (
         <div className="sidebar p-0" style={{ backgroundColor: '#1E0342' }}>
             <div className="row w-100 m-0">
                 <div className="col d-flex flex-column justify-content-between min-vh-100 sidebar-scroll">
                     <div>
-                        <NavLink to="/admin/dashboard" className='text-decoration-none ms-4 d-flex align-items-center text-white d-none d-sm-inline'>
-                            <span className='fs-4 text-center'>Side Admin</span>
+                        <NavLink to={`${rolePrefix}/dashboard`} className='text-decoration-none d-flex align-items-center text-white gap-2 mt-3'>
+                            <div >
+                                <img src={LogoPemkot} alt="Logo Pemkot" />
+                            </div>
+                            <div>
+                                <h6 className='ubuntu-sans-semibold m-0'>DSPM Kota Bontang</h6>
+                            </div>
                         </NavLink>
                         <hr className="text-white d-none d-sm-block" />
                         <h6 className='text-white'>Menu</h6>
                         <ul className="nav nav-pills flex-column gap-1" id="parentM">
                             <li className="nav-item">
                                 <NavLink
-                                    to="/admin/dashboard"
+                                    to={`${rolePrefix}/dashboard`}
                                     className={`text-decoration-none d-flex align-items-center gap-2 lh-1 rounded ${activeItem === 'Dashboard' ? 'text-white bg-primary' : 'text-white'}`}
                                     aria-current="page"
                                     style={{ padding: '14px 16px' }}
@@ -91,7 +165,7 @@ function SidebarAdmin() {
                             </li>
                             <li className="nav-item">
                                 <NavLink
-                                    to="/admin/users"
+                                    to={`${rolePrefix}/users`}
                                     className={`text-decoration-none d-flex align-items-center gap-2 lh-1 rounded ${activeItem === 'Users' ? 'text-white bg-primary' : 'text-white'}`}
                                     aria-current="page"
                                     style={{ padding: '14px 16px' }}
@@ -111,7 +185,7 @@ function SidebarAdmin() {
                                     <div className="d-flex align-items-center gap-2 lh-1">
                                         <FiFolder size='18px' strokeWidth='2' />
                                         <span className='ubuntu-sans-medium' style={{ fontSize: '.85rem' }}>Layanan</span>
-                                        <span className='bg-primary ubuntu-sans-medium text-white p-1 rounded-5' style={{ fontSize: '.7rem' }}>198</span>
+                                        <span className='bg-primary ubuntu-sans-medium text-white p-1 rounded-5' style={{ fontSize: '.7rem' }}>{totalLayananCount}</span>
                                     </div>
                                     <div>
                                         <IoIosArrowDown size='14px' />
@@ -121,7 +195,7 @@ function SidebarAdmin() {
                                     {layananItems.map(layanan => (
                                         <li key={layanan.name} className="nav-item rounded">
                                             <NavLink
-                                                to={`/admin/layanan/${layanan.path}`}
+                                                to={`${rolePrefix}/layanan/${layanan.path}`}
                                                 className={`text-decoration-none d-flex gap-1 justify-content-between align-items-center ${selectedLayanan?.name === layanan.name ? 'text-white bg-primary rounded' : 'text-white'}`}
                                                 aria-current="page"
                                                 style={{ padding: '8px 12px' }}
@@ -130,7 +204,11 @@ function SidebarAdmin() {
                                                 <div className='d-flex align-items-center gap-2'>
                                                     <span className='ubuntu-sans-medium' style={{ fontSize: '.85rem' }}>{layanan.name}</span>
                                                 </div>
-                                                <span className={`px-1 ubuntu-sans-medium rounded-pill ${selectedLayanan?.name === layanan.name ? 'bg-white text-primary' : 'bg-primary text-white'}`} style={{ fontSize: '.7rem' }}>{layanan.count}</span>
+                                                {layananCounts[layanan.path] > 0 && (
+                                                    <span className={`px-1 ubuntu-sans-medium rounded-pill ${selectedLayanan?.name === layanan.name ? 'bg-white text-primary' : 'bg-primary text-white'}`} style={{ fontSize: '.7rem' }}>
+                                                        {layananCounts[layanan.path] || 0}
+                                                    </span>
+                                                )}
                                             </NavLink>
                                         </li>
                                     ))}
@@ -138,7 +216,7 @@ function SidebarAdmin() {
                             </li>
                             <li className="nav-item">
                                 <NavLink
-                                    to="/admin/pengaduan-DSPM"
+                                    to={`${rolePrefix}/pengaduan-DSPM`}
                                     className={`text-decoration-none d-flex align-items-center gap-2 lh-1 rounded ${activeItem === 'Pengaduan' ? 'text-white bg-primary' : 'text-white'}`}
                                     aria-current="page"
                                     style={{ padding: '14px 16px' }}
@@ -148,18 +226,20 @@ function SidebarAdmin() {
                                     <span className='ubuntu-sans-medium' style={{ fontSize: '.85rem' }}>Pengaduan DSPM</span>
                                 </NavLink>
                             </li>
-                            <li className="nav-item">
-                                <NavLink
-                                    to="/admin/informasi"
-                                    className={`text-decoration-none d-flex align-items-center gap-2 lh-1 rounded ${activeItem === 'Informasi' ? 'text-white bg-primary' : 'text-white'}`}
-                                    aria-current="page"
-                                    style={{ padding: '14px 16px' }}
-                                    onClick={() => handleItemClick('Informasi')}
-                                >
-                                    <FiUser size='18px' strokeWidth='2' />
-                                    <span className='ubuntu-sans-medium' style={{ fontSize: '.85rem' }}>Informasi</span>
-                                </NavLink>
-                            </li>
+                            {role !== 3 && (
+                                <li className="nav-item">
+                                    <NavLink
+                                        to="/admin/informasi"
+                                        className={`text-decoration-none d-flex align-items-center gap-2 lh-1 rounded ${activeItem === 'Informasi' ? 'text-white bg-primary' : 'text-white'}`}
+                                        aria-current="page"
+                                        style={{ padding: '14px 16px' }}
+                                        onClick={() => handleItemClick('Informasi')}
+                                    >
+                                        <FiUser size='18px' strokeWidth='2' />
+                                        <span className='ubuntu-sans-medium' style={{ fontSize: '.85rem' }}>Informasi</span>
+                                    </NavLink>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>

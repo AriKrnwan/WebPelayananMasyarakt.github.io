@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import InputFile from "../../components/Input Field/inputFile";
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import api from '../api';
 import Swal from 'sweetalert2';
 import InputNumber from '../Input Field/inputNumber';
 
-function SubmitBantuanLogistik({ disabled = false }) {
+function SubmitBantuanLogistik() {
     const [selectedData, setSelectedData] = useState({
         ktp: [],
         surat_permohonan_bantuan_logistik: [],
@@ -24,17 +24,25 @@ function SubmitBantuanLogistik({ disabled = false }) {
         }
     }, []);
 
+    const handleFileChange = (name, files) => {
+        setSelectedData(prevState => ({ ...prevState, [name]: files }));
+        setErrors(prevState => ({ ...prevState, [name]: null }));
+    };
+
     const handleInputChange = (name, value) => {
         setSelectedData(prevState => ({ ...prevState, [name]: value }));
-        setErrors(prevState => ({ ...prevState, [name]: null }));  // Clear error on input change
+        setErrors(prevState => ({ ...prevState, [name]: null }));  
     };
 
     const validateInputs = () => {
         const newErrors = {};
         const requiredFields = ['ktp', 'surat_permohonan_bantuan_logistik', 'dokumentasi_bencana', 'jml_tedampak'];
         for (const field of requiredFields) {
-            if (selectedData[field].length === 0) newErrors[field] = `${field.toUpperCase()} is required`;
+            if (!selectedData[field] || selectedData[field].length === 0) {
+                newErrors[field] = 'Field tidak boleh kosong';
+            }
         }
+        setErrors(newErrors); // Update state errors with newErrors
         return newErrors;
     };
 
@@ -90,12 +98,7 @@ function SubmitBantuanLogistik({ disabled = false }) {
                 confirmButtonText: "OK",
                 denyButtonText: `Don't save`,
                 text: "Klik ok",
-            }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
-            });
+            })
         } catch (error) {
             console.error('Error uploading data:', error);
             if (error.response) {
@@ -109,26 +112,26 @@ function SubmitBantuanLogistik({ disabled = false }) {
             <InputFile
                 id="ktp"
                 name="ktp"
-                label='KTP'
+                label='KTP Pemohon'
                 showDownloadButton={false}
-                onChange={(e) => handleInputChange('ktp', Array.from(e.target.files))}
-                error={errors.ktp}
+                onChange={(e) => handleFileChange('ktp', Array.from(e.target.files))}
+                error={errors.ktp} // Pastikan errors.ktp di sini sesuai dengan validasi
             />
             <InputFile
                 id="surat_permohonan_bantuan_logistik"
                 name="surat_permohonan_bantuan_logistik"
                 label='Surat Permohonan Bantuan Logistik'
                 showDownloadButton={false}
-                onChange={(e) => handleInputChange('surat_permohonan_bantuan_logistik', Array.from(e.target.files))}
-                error={errors.surat_permohonan_bantuan_logistik}
+                onChange={(e) => handleFileChange('surat_permohonan_bantuan_logistik', Array.from(e.target.files))}
+                error={errors.surat_permohonan_bantuan_logistik} // Pastikan errors.surat_permohonan_bantuan_logistik di sini sesuai dengan validasi
             />
             <InputFile
                 id="dokumentasi_bencana"
                 name="dokumentasi_bencana"
                 label='Dokumentasi Bencana'
                 showDownloadButton={false}
-                onChange={(e) => handleInputChange('dokumentasi_bencana', Array.from(e.target.files))}
-                error={errors.dokumentasi_bencana}
+                onChange={(e) => handleFileChange('dokumentasi_bencana', Array.from(e.target.files))}
+                error={errors.dokumentasi_bencana} // Pastikan errors.dokumentasi_bencana di sini sesuai dengan validasi
             />
             <InputNumber
                 label='Jumlah Terdampak'
@@ -138,17 +141,17 @@ function SubmitBantuanLogistik({ disabled = false }) {
                 onChange={handleInputChange} 
                 error={errors.jml_tedampak}
             />
-            {!disabled && (
+            {/* {!disabled && ( */}
                 <div className="mt-3 text-end">
                     <button className="btn btn-primary" style={{ fontSize: '.9rem' }} type="button" onClick={handleSubmit}>Kirim</button>
                 </div>
-            )}
+            {/* )} */}
         </>
     );
 }
 
-SubmitBantuanLogistik.propTypes = {
-    disabled: PropTypes.bool
-};
+// SubmitBantuanLogistik.propTypes = {
+//     disabled: PropTypes.bool
+// };
 
 export default SubmitBantuanLogistik;

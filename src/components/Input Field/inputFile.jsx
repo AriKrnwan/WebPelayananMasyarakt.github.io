@@ -5,8 +5,9 @@ import { BsQuestionCircleFill } from "react-icons/bs";
 import './input.css';
 import api from '../api';
 import { RxCross2 } from "react-icons/rx";
+// import path from 'path';
 
-function InputFile({ label, moreInfo, name, onChange, disabled, error, filePath, showDownloadButton, table, col }) {
+function InputFile({ label, moreInfo, name, onChange, disabled, error, id, showDownloadButton, showTemplateButton, table, col, accept }) {
     const [isHovered, setIsHovered] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const fileInputRef = useRef(null);
@@ -21,22 +22,28 @@ function InputFile({ label, moreInfo, name, onChange, disabled, error, filePath,
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${table}/${filePath}/${name}`, {
-                responseType: 'blob'
-            });
-
-            // Buat URL objek dari data blob
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            // Tentukan nama file yang akan diunduh
-            const fileName = 'files.zip'; // Anda dapat menentukan nama file secara dinamis jika diperlukan
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${table}/${id}/${name}`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -46,14 +53,11 @@ function InputFile({ label, moreInfo, name, onChange, disabled, error, filePath,
         const newSelectedFiles = selectedFiles.filter(file => file.name !== fileName);
         setSelectedFiles(newSelectedFiles);
 
-        // Create a new DataTransfer object and add the remaining files
         const dataTransfer = new DataTransfer();
         newSelectedFiles.forEach(file => dataTransfer.items.add(file));
 
-        // Update the input file with the new DataTransfer files
         fileInputRef.current.files = dataTransfer.files;
 
-        // Create a new event and call onChange
         const newEvent = new Event('change', { bubbles: true });
         fileInputRef.current.dispatchEvent(newEvent);
     };
@@ -89,13 +93,20 @@ function InputFile({ label, moreInfo, name, onChange, disabled, error, filePath,
                     onChange={handleFileChange}
                     isInvalid={!!error}
                     multiple
+                    accept={accept}
                 />
                 {showDownloadButton && (
                     <button type="button" className="btn btn-sm btn-primary" style={{ fontSize: '.85rem', backgroundColor: '#224B80' }} onClick={handleDownload}>
                         Unduh
                     </button>
                 )}
+                {showTemplateButton && (
+                    <button type="button" className="btn btn-sm btn-primary" style={{ fontSize: '.85rem', backgroundColor: '#224B80' }} onClick={handleDownload}>
+                        Template
+                    </button>
+                )}
             </div>
+            {error && <Form.Control.Feedback type="invalid" style={{ fontSize: '.85rem' }}>{error}</Form.Control.Feedback>}
             {selectedFiles.length > 0 && (
                 <div className="mt-1">
                     {selectedFiles.map((file, index) => (
@@ -119,17 +130,19 @@ InputFile.propTypes = {
     onChange: PropTypes.func,
     disabled: PropTypes.bool,
     error: PropTypes.string,
-    filePath: PropTypes.arrayOf(PropTypes.string),
+    id: PropTypes.string,
     showDownloadButton: PropTypes.bool,
+    showTemplateButton: PropTypes.bool,
     col: PropTypes.string,
+    accept: PropTypes.string,
 };
 
 InputFile.defaultProps = {
     disabled: false,
     error: null,
-    filePath: [],
     showDownloadButton: false,
+    showTemplateButton: false,
     col: 'col-lg-6',
 };
 
-export default InputFile
+export default InputFile;

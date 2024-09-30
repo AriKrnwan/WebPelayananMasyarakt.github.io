@@ -160,7 +160,7 @@ function DetailInformasi() {
                                         label="Foto"
                                         name="foto"
                                         showDownloadButton
-                                        filePath={data && data.id ? data.id : ''}
+                                        id={data && data.id ? data.id : ''}
                                         table={layanan}
                                         onChange={(e) => setFotoFile(e.target.files[0])}
                                         col='col'

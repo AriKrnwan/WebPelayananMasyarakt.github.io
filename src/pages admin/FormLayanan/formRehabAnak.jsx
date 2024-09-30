@@ -8,13 +8,16 @@ import { useNavigate } from 'react-router-dom';
 
 function FormAdminRehabAnak() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+    const [selectedData, setFormData] = useState({
         NIK: "",
         namaLengkap: "",
+        gender: "",
         alamat: "",
         kecamatan: "",
         kelurahan: "",
         rt: "",
+        pendidikan: "",
+        pekerjaan: "",
         email: "",
         noTelepon: "",
         jml_tedampak: "",
@@ -25,27 +28,35 @@ function FormAdminRehabAnak() {
         suket_kelurahan: [],
     });
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({ ...selectedData, [name]: value });
+        const newErrors = { ...errors };
+        delete newErrors[name];
+        setErrors(newErrors);
     };
 
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData({ ...formData, [name]: files });
+    const handleFileChange = (name, files) => {
+        setFormData(prevState => ({ ...prevState, [name]: files }));
+        setErrors(prevState => ({ ...prevState, [name]: null }));
     };
 
     const handleKirimNIK = async () => {
         try {
-            const response = await api.get(`/getUserByNIK/${formData.NIK}`);
+            const response = await api.get(`/getUserByNIK/${selectedData.NIK}`);
             const data = response.data;
             setFormData({
-                ...formData,
+                ...selectedData,
                 namaLengkap: data.full_name || "",
+                gender: data.gender || "",
                 alamat: data.alamat || "",
                 kecamatan: data.kecamatan || "",
                 kelurahan: data.kelurahan || "",
                 rt: data.rt || "",
+                pekerjaan: data.pekerjaan || "",
+                pendidikan: data.pendidikan || "",
                 email: data.email || "",
                 noTelepon: data.no_telp || ""
             });
@@ -59,31 +70,44 @@ function FormAdminRehabAnak() {
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!selectedData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (selectedData.ktp.length === 0) newErrors.ktp = 'Field tidak boleh kosong';
+        if (selectedData.identitas.length === 0) newErrors.identitas = 'Field tidak boleh kosong';
+        if (selectedData.suket_kelurahan.length === 0) newErrors.suket_kelurahan = 'Field tidak boleh kosong';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
-        // Validation checks
-        if (!formData.NIK || formData.ktp.length === 0 || formData.identitas.length === 0 || formData.suket_kelurahan.length === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Harap mengisi semua field yang diperlukan',
-            });
+        window.scrollTo(0, 0);
+        if (!validateForm()) {
             return;
         }
 
-        const formDataToSend = new FormData();
-        formDataToSend.append('NIK', formData.NIK);
-        formDataToSend.append('ktp', formData.ktp[0]);
-        formDataToSend.append('identitas', formData.identitas[0]);
-        formDataToSend.append('suket_kelurahan', formData.suket_kelurahan[0]);
-
         try {
             const token = localStorage.getItem('token');
-            const response = await api.post('/admin-upload-rehabilitasi-anak-terlantar', formDataToSend, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
+
+            const formData = new FormData();
+            const fields = ['ktp', 'identitas', 'suket_kelurahan'];
+            fields.forEach(field => {
+                selectedData[field].forEach(file => {
+                    formData.append(field, file);
+                });
             });
+
+            formData.append('NIK', selectedData.NIK);
+    
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
+            const response = await api.post('/admin-upload-rehabilitasi-anak-terlantar', formData, config);
             console.log("Data submitted successfully:", response.data);
             Swal.fire({
                 title: "Good job!",
@@ -104,8 +128,9 @@ function FormAdminRehabAnak() {
                     label="NIK"
                     name="NIK"
                     placeholder="Masukkan NIK"
-                    value={formData.NIK}
+                    value={selectedData.NIK}
                     onChange={handleChange}
+                    error={errors.NIK}
                 />
                 <div>
                     <div className="btn btn-primary" onClick={handleKirimNIK} style={{fontSize: '.9rem', marginTop: '-8px'}}>Pilih</div>
@@ -116,7 +141,16 @@ function FormAdminRehabAnak() {
                 name="namaLengkap"
                 col="col-lg-6"
                 placeholder="Nama Lengkap"
-                value={formData.namaLengkap}
+                value={selectedData.namaLengkap}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Jenis Kelamin"
+                name="gender"
+                col="col-lg-6"
+                placeholder="Jenis Kelamin"
+                value={selectedData.gender}
                 onChange={handleChange}
                 disabled
             />
@@ -125,7 +159,7 @@ function FormAdminRehabAnak() {
                 name="alamat"
                 col="col-lg-6"
                 placeholder="Alamat"
-                value={formData.alamat}
+                value={selectedData.alamat}
                 onChange={handleChange}
                 disabled
             />
@@ -134,7 +168,7 @@ function FormAdminRehabAnak() {
                 name="kecamatan"
                 col="col-lg-6"
                 placeholder="Kecamatan"
-                value={formData.kecamatan}
+                value={selectedData.kecamatan}
                 onChange={handleChange}
                 disabled
             />
@@ -143,7 +177,7 @@ function FormAdminRehabAnak() {
                 name="kelurahan"
                 col="col-lg-6"
                 placeholder="Kelurahan"
-                value={formData.kelurahan}
+                value={selectedData.kelurahan}
                 onChange={handleChange}
                 disabled
             />
@@ -152,7 +186,25 @@ function FormAdminRehabAnak() {
                 name="rt"
                 col="col-lg-6"
                 placeholder="RT"
-                value={formData.rt}
+                value={selectedData.rt}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pendidikan Terakhir"
+                name="pendidikan"
+                col="col-lg-6"
+                placeholder="Pendidikan Terakhir"
+                value={selectedData.pendidikan}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pekerjaan"
+                name="pekerjaan"
+                col="col-lg-6"
+                placeholder="Pekerjaan"
+                value={selectedData.pekerjaan}
                 onChange={handleChange}
                 disabled
             />
@@ -161,7 +213,7 @@ function FormAdminRehabAnak() {
                 name="email"
                 col="col-lg-6"
                 placeholder="Email"
-                value={formData.email}
+                value={selectedData.email}
                 onChange={handleChange}
                 disabled
             />
@@ -170,30 +222,28 @@ function FormAdminRehabAnak() {
                 name="noTelepon"
                 col="col-lg-6"
                 placeholder="No. Telepon"
-                value={formData.noTelepon}
+                value={selectedData.noTelepon}
                 onChange={handleChange}
                 disabled
             />
             <h6 className="mt-4">Berkas Pemohon</h6>
             <InputFile
-                label="KTP"
+                label="KTP Pelapor"
                 name="ktp"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('ktp', Array.from(e.target.files))}
+                error={errors.ktp}
             />
             <InputFile
-                label="Surat Rujukan"
+                label="Identitas Anak"
                 name="identitas"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('identitas', Array.from(e.target.files))}
+                error={errors.identitas}
             />
             <InputFile
-                label="Identitas PMKS/PPKS"
+                label="Surat Keterangan"
                 name="suket_kelurahan"
-                onChange={handleFileChange}
-            />
-            <InputFile
-                label="Identitas Pelapor"
-                name="identitas_pelapor"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('suket_kelurahan', Array.from(e.target.files))}
+                error={errors.suket_kelurahan}
             />
             <div className="text-end mt-3">
                 <div className="btn btn-primary" onClick={handleSubmit} style={{fontSize: '.9rem'}}>Kirim</div>

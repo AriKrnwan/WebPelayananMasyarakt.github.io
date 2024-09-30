@@ -37,39 +37,6 @@ function Lay() {
         return path.substring(1); // Remove the leading slash
     };
 
-    const renderForm = () => {
-        switch (location.pathname) {
-            case '/bantuan-logistik':
-                return <SubmitBantuanLogistik />;
-            case '/santunan-kematian':
-                return <SubmitSantunanKematian />;
-            case '/SKT':
-                return <SubmitSKT />;
-            case '/SIO':
-                return <SubmitSIO />;
-            case '/pengumpulan-uang-dan-barang':
-                return <SubmitPUB />;
-            case '/rehabilitasi-lansia':
-                return <SubmitRehabilitasiLansia />;
-            case '/rumah-singgah':
-                return <SubmitRumahSinggah />;
-            case '/rehabilitasi-anak-terlantar':
-                return <SubmitRehabAnak />;
-            case '/penyandang-disabilitas':
-                return <SubmitPenyandangDisabilitas />;
-            case '/pengangkatan-anak':
-                return <SubmitPengangkatanAnak />;
-            case '/PBI-JK':
-                return <SubmitPBIJK />;
-            case '/DTKS':
-                return <SubmitDTKS />;
-            case '/pengaduan-DSPM':
-                return <SubmitPengaduan />;
-            default:
-                return null;
-        }
-    };
-
     const getTitle = () => {
         switch (location.pathname) {
             case '/bantuan-logistik':
@@ -113,15 +80,14 @@ function Lay() {
             return;
         }
 
-        const fetchData = (endpoint) => {
-            api.get(endpoint, {
-                params: { user_nik: userData.NIK },
-                headers: { Authorization: `Bearer ${userData.token}` }
-            })
-            .then(response => {
-                console.log('Data dari backend:', response.data);
+        const fetchData = async () => {
+            try {
+                const response = await api.get(`/lay-${getLayananName()}`, {
+                    params: { user_nik: userData.NIK },
+                    headers: { Authorization: `Bearer ${userData.token}` }
+                });
+
                 const fetchedData = response.data.map(item => {
-                    // Tentukan status berdasarkan nilai kolom-kolom di database
                     let status;
                     if (item.submit_at && !item.valid_at && !item.reject_at && !item.accept_at) {
                         status = 'Menunggu Validasi';
@@ -131,10 +97,10 @@ function Lay() {
                         status = 'Ditolak';
                     } else if (item.submit_at && item.valid_at && !item.reject_at && item.accept_at) {
                         status = 'Diterima';
-                    } else if (item.submit_at && !item.valid_at && item.reject_at && !item.accept_at){
-                        status = 'Berkas Tidak Valid'; // Handle jika kondisi tidak sesuai
+                    } else if (item.submit_at && !item.valid_at && item.reject_at && !item.accept_at) {
+                        status = 'Berkas Tidak Valid';
                     } else {
-                        status = 'Status tidak valid'; // Handle jika kondisi tidak sesuai
+                        status = 'Status tidak valid';
                     }
 
                     return {
@@ -147,50 +113,50 @@ function Lay() {
 
                 setDataProses(fetchedData.filter(item => item.status === 'Menunggu Validasi' || item.status === 'Berkas Diproses'));
                 setDataSelesai(fetchedData.filter(item => item.status === 'Ditolak' || item.status === 'Diterima' || item.status === 'Berkas Tidak Valid'));
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching data:', error);
-            });
+            }
         };
 
-        // Data dummy
-        const dummyData = [
-            { id: 1, nopel: 'NOP001', tanggal: '2024-06-20T10:30:00Z', status: 'Menunggu Validasi' },
-            { id: 2, nopel: 'NOP002', tanggal: '2024-06-19T11:00:00Z', status: 'Berkas Diproses' },
-            { id: 3, nopel: 'NOP003', tanggal: '2024-06-18T09:15:00Z', status: 'Ditolak' },
-            { id: 4, nopel: 'NOP004', tanggal: '2024-06-17T14:20:00Z', status: 'Diterima' },
-            { id: 5, nopel: 'NOP005', tanggal: '2024-06-16T12:45:00Z', status: 'Berkas Tidak Valid' }
-        ];
+        const interval = setInterval(() => {
+            fetchData();
+        }, 5000); // Polling setiap 5 detik
 
-        setDataProses(dummyData.filter(item => item.status === 'Menunggu Validasi' || item.status === 'Berkas Diproses'));
-        setDataSelesai(dummyData.filter(item => item.status === 'Ditolak' || item.status === 'Diterima' || item.status === 'Berkas Tidak Valid'));
-
-        if (location.pathname === '/bantuan-logistik') {
-            fetchData('/lay-bantuan-logistik');
-        } else if (location.pathname === '/santunan-kematian') {
-            fetchData('/lay-santunan-kematian');
-        } else if (location.pathname === '/SKT') {
-            fetchData('/lay-SKT');
-        } else if (location.pathname === '/SIO') {
-            fetchData('/lay-SIO');
-        } else if (location.pathname === '/pengumpulan-uang-dan-barang') {
-            fetchData('/lay-pengumpulan-uang-dan-barang');
-        } else if (location.pathname === '/rumah-singgah') {
-            fetchData('/lay-rumah-singgah');
-        } else if (location.pathname === '/rehabilitasi-lansia') {
-            fetchData('/lay-rehabilitasi-lansia');
-        } else if (location.pathname === '/rehabilitasi-anak-terlantar') {
-            fetchData('/lay-rehabilitasi-anak-terlantar');
-        } else if (location.pathname === '/penyandang-disabilitas') {
-            fetchData('/lay-penyandang-disabilitas');
-        } else if (location.pathname === '/pengangkatan-anak') {
-            fetchData('/lay-pengangkatan-anak');
-        } else if (location.pathname === '/DTKS') {
-            fetchData('/lay-DTKS');
-        } else if (location.pathname === '/PBI-JK') {
-            fetchData('/lay-PBI-JK');
-        }
+        return () => clearInterval(interval); // Cleanup saat komponen di-unmount
     }, [location.pathname]);
+
+    const renderForm = () => {
+        switch (location.pathname) {
+            case '/bantuan-logistik':
+                return <SubmitBantuanLogistik />;
+            case '/santunan-kematian':
+                return <SubmitSantunanKematian />;
+            case '/SKT':
+                return <SubmitSKT />;
+            case '/SIO':
+                return <SubmitSIO />;
+            case '/pengumpulan-uang-dan-barang':
+                return <SubmitPUB />;
+            case '/rehabilitasi-lansia':
+                return <SubmitRehabilitasiLansia />;
+            case '/rumah-singgah':
+                return <SubmitRumahSinggah />;
+            case '/rehabilitasi-anak-terlantar':
+                return <SubmitRehabAnak />;
+            case '/penyandang-disabilitas':
+                return <SubmitPenyandangDisabilitas />;
+            case '/pengangkatan-anak':
+                return <SubmitPengangkatanAnak />;
+            case '/PBI-JK':
+                return <SubmitPBIJK />;
+            case '/DTKS':
+                return <SubmitDTKS />;
+            case '/pengaduan-DSPM':
+                return <SubmitPengaduan />;
+            default:
+                return null;
+        }
+    };
 
     return (
         <>

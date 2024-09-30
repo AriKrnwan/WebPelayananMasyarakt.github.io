@@ -57,27 +57,27 @@ function EditPengajuan() {
         switch (layanan) {
             case 'bantuan-logistik':
                 return 'Pelayanan Bantuan Logistik Korban Bencana';
-            case '/detail-pengajuan/santunan-kematian':
+            case 'santunan-kematian':
                 return 'Pelayanan Pemberian Santunan Kematian';
-            case '/detail-pengajuan/SKT':
+            case 'SKT':
                 return 'Pelayanan Surat Keterangan Terdaftar (SKT)';
-            case '/detail-pengajuan/SIO':
+            case 'SIO':
                 return 'Pelayanan Surat Izin Operasional (SIO)';
-            case '/detail-pengajuan/pengumpulan-uang-dan-barang':
+            case 'pengumpulan-uang-dan-barang':
                 return 'Pelayanan Rekomendasi Pengumpulan Uang dan Barang';
-            case '/detail-pengajuan/rehabilitasi-lansia':
+            case 'rehabilitasi-lansia':
                 return 'Pelayanan Rehabilitasi Sosial Lanjut Usia';
-            case '/detail-pengajuan/rumah-singgah':
+            case 'rumah-singgah':
                 return 'Pelayanan Rumah Singgah';
-            case '/detail-pengajuan/rehabilitasi-anak-terlantar':
+            case 'rehabilitasi-anak-terlantar':
                 return 'Pelayanan Rekomendasi Rehabilitasi Sosial Dasar Anak Terlantar';
-            case '/detail-pengajuan/penyandang-disabilitas':
+            case 'penyandang-disabilitas':
                 return 'Pelayanan Data dan Pengaduan Penyandang Disabilitas';
-            case '/detail-pengajuan/pengangkatan-anak':
+            case 'pengangkatan-anak':
                 return 'Pelayanan Penertiban Rekomendasi Usulan Calon Pengangkatan Anak';
-            case '/detail-pengajuan/PBI-JK':
+            case 'PBI-JK':
                 return 'Pelayanan Penanganan Pengaduan Penerima Bantuan Iuran-Jaminan Kesehatan (PBI-JK)';
-            case '/detail-pengajuan/DTKS':
+            case 'DTKS':
                 return 'Pelayanan Surat Keterangan Data Terpadu Kesejahteraan Sosial';
             default:
                 return 'Pelayanan Publik';

@@ -160,13 +160,13 @@ function InformasiAdminSide() {
                                         </div>
                                     </NavLink>
                                 </div>
-                                <div className="d-flex align-items-center justify-content-between">
-                                    <div className="show-entries d-flex align-items-center gap-1 mb-2 w-100">
+                                <div className="d-flex align-items-center justify-content-between mb-2">
+                                    <div className="show-entries d-flex align-items-center gap-1 w-100">
                                         <span style={{ fontSize: '.8rem' }}>Show</span>
                                         <Form.Control
                                             className='custom-entries px-1 text-center'
                                             as="select"
-                                            style={{ fontSize: '.8rem', width: '10%' }}
+                                            style={{ fontSize: '.8rem', width: '48px' }}
                                             value={showEntries}
                                             onChange={handleShowEntriesChange}
                                         >
@@ -178,12 +178,12 @@ function InformasiAdminSide() {
                                         <span style={{ fontSize: '.8rem' }}>entries</span>
                                     </div>
                                     <div className="search-bar w-100 d-flex align-items-center justify-content-end gap-2">
-                                        <span style={{ fontSize: '.8rem' }}>Search: </span>
                                         <Form.Control 
                                             type="text"
-                                            style={{ fontSize: '.8rem', width: '36%' }}
+                                            style={{ fontSize: '.8rem', width: '180px' }}
                                             value={searchTerm}
                                             onChange={handleSearchChange}
+                                            placeholder="Search..."
                                         ></Form.Control>
                                     </div>
                                 </div>

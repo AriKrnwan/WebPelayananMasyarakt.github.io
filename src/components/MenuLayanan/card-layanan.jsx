@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { NavLink } from "react-router-dom";
+import './layanan.css'
 
 function CardLayanan({ image, title, to }) {
     return (

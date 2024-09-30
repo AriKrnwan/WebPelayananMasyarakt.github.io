@@ -12,16 +12,26 @@ function FormSKT({ disabled }) {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const navigate = useNavigate();
-    const [ktpFile, setKtpFile] = useState(null);
-    const [suratPermohonanFile, setSuratPermohonanFile] = useState(null);
-    const [aktaFile, setAktaFile] = useState(null);
-    const [adartFile, setAdartFile] = useState(null);
-    const [strukturFile, setStrukturFile] = useState(null);
-    const [domisiliFile, setDomisiliFile] = useState(null);
-    const [biodataFile, setBiodataFile] = useState(null);
-    const [prokerFile, setProkerFile] = useState(null);
-    const [NPWPFile, setNPWPFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        surat_permohonan_pengajuan_lks: [],
+        akta_notaris_pendirian: [],
+        adart: [],
+        struktur_organisasi: [],
+        suket_domisili: [],
+        biodata: [],
+        proker: [],
+        npwp: [],
+    });
     const layanan = 'lay_skt'
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,17 +57,25 @@ function FormSKT({ disabled }) {
     }, [nopel]);
 
     const handleUpdate = async () => {
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        
+        if (!hasFiles) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (suratPermohonanFile) formData.append('surat_permohonan_pengajuan_lks', suratPermohonanFile);
-        if (aktaFile) formData.append('akta_notaris_pendirian', aktaFile);
-        if (adartFile) formData.append('adart', adartFile);
-        if (strukturFile) formData.append('struktur_organisasi', strukturFile);
-        if (domisiliFile) formData.append('suket_domisili', domisiliFile);
-        if (biodataFile) formData.append('biodata', biodataFile);
-        if (prokerFile) formData.append('proker', prokerFile);
-        if (NPWPFile) formData.append('npwp', NPWPFile);
 
         try {
             const token = localStorage.getItem('token');
@@ -83,20 +101,28 @@ function FormSKT({ disabled }) {
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
-                responseType: 'blob'
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            const fileName = 'files.zip';
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${layanan}/${data.id}/product`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -198,94 +224,85 @@ function FormSKT({ disabled }) {
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
                     <InputFile
-                        id="ktp"
                         name="ktp"
                         label="KTP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
-                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="surat_permohonan_pengajuan_lks"
                         name="surat_permohonan_pengajuan_lks"
                         label="Surat Permohonan Pengajuan LKS"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setSuratPermohonanFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="akta_notaris_pendirian"
                         name="akta_notaris_pendirian"
                         label="Akta Notaris Pendirian"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setAktaFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="adart"
                         name="adart"
                         label="Anggaran Dasar dan Anggaran Rumah Tangga"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setAdartFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="struktur_organisasi"
                         name="struktur_organisasi"
                         label="Struktur Organisasi"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setStrukturFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="suket_domisili"
                         name="suket_domisili"
                         label="Surat Keterangan Domisili"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setDomisiliFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="biodata"
                         name="biodata"
                         label="Biodata"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setBiodataFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="proker"
                         name="proker"
                         label="Program Kerja"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setProkerFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="npwp"
                         name="npwp"
                         label="NPWP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setNPWPFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     {!disabled && (

@@ -12,11 +12,24 @@ function FormRumahSinggah({ disabled }) {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const navigate = useNavigate();
-    const [ktpFile, setKtpFile] = useState(null);
-    const [rujukanFile, setRujukanFile] = useState(null);
-    const [identitasPMKSFile, setIdentitasPMKSFile] = useState(null);
-    const [identitasPelapor, setIdentitasPelapor] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        surat_rujukan: [],
+        identitas_pmks: [],
+        identitas_pelapor: [],
+        berita_acara: [],
+        surat_pernyataan: [],
+        foto: [],
+    });
     const layanan = 'lay_rumah_singgah'
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,12 +55,25 @@ function FormRumahSinggah({ disabled }) {
     }, [nopel]);
 
     const handleUpdate = async () => {
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        
+        if (!hasFiles) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (rujukanFile) formData.append('surat_rujukan', rujukanFile);
-        if (identitasPMKSFile) formData.append('identitas_pmks', identitasPMKSFile);
-        if (identitasPelapor) formData.append('identitas_pelapor', identitasPelapor);
 
         try {
             const token = localStorage.getItem('token');
@@ -73,20 +99,28 @@ function FormRumahSinggah({ disabled }) {
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
-                responseType: 'blob'
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            const fileName = 'files.zip';
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${layanan}/${data.id}/product`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -188,44 +222,67 @@ function FormRumahSinggah({ disabled }) {
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
                     <InputFile
-                        id="ktp"
                         name="ktp"
                         label="KTP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
-                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="surat_rujukan"
                         name="surat_rujukan"
                         label="Surat Rujukan"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setRujukanFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="identitas_pmks"
                         name="identitas_pmks"
                         label="Identitas PMKS"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setIdentitasPMKSFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="identitas_pelapor"
                         name="identitas_pelapor"
                         label="Identitas Pelapor"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setIdentitasPelapor(e.target.files[0])}
+                        onChange={handleFileChange}
+                        table={layanan}
+                    />
+                    <InputFile
+                        name="berita_acara"
+                        label="Berita Acara Pemohon/Instansi"
+                        disabled={disabled || status !== "Menunggu Validasi"}
+                        id={data.id}
+                        showDownloadButton={true}
+                        onChange={handleFileChange}
+                        table={layanan}
+                    />
+                    <InputFile
+                        name="surat_pernyataan"
+                        label="Surat Pernyataan"
+                        disabled={disabled || status !== "Menunggu Validasi"}
+                        id={data.id}
+                        showDownloadButton={true}
+                        onChange={handleFileChange}
+                        table={layanan}
+                    />
+                    <InputFile
+                        name="foto"
+                        label="Foto Kondisi Sekarang"
+                        disabled={disabled || status !== "Menunggu Validasi"}
+                        id={data.id}
+                        showDownloadButton={true}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     {!disabled && (

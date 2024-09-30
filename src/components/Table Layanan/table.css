@@ -28,12 +28,12 @@ td {
 }
 
 .col-aksi {
-    width: 120px;
+    width: 100px;
 }
 
-.col-nopel {
+/* .col-nopel {
     width: 170px;
-}
+} */
 
 @media (max-width: 768px) {
     .custom-entries {
@@ -64,4 +64,20 @@ td {
 .col-status {
     width: 150px;
 } */
+
+/* .col-tanggal {
+    width: 148px;
+}
+
+.col-noinfo {
+    width: 120px;
+}
+
+.col-nik {
+    width: 150px;
+} */
+
+.col-cek {
+    width: 40px;
+}
 

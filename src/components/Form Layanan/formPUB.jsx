@@ -12,15 +12,25 @@ function FormPUB({ disabled }) {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const navigate = useNavigate();
-    const [ktpFile, setKtpFile] = useState(null);
-    const [ormasFile, setOrmasFile] = useState(null);
-    const [lksFile, setLksFile] = useState(null);
-    const [NPWPFile, setNPWPFile] = useState(null);
-    const [buktiFile, setBuktiFile] = useState(null);
-    const [rekeningFile, setRekeningFile] = useState(null);
-    const [legalFile, setLegalFile] = useState(null);
-    const [suratMateraiFile, setSuratMateraiFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        suket_ormas: [],
+        suket_lks: [],
+        npwp: [],
+        bukti_setor: [],
+        rekening: [],
+        surat_legal: [],
+        surat_pernyataan_bermaterai: [],
+    });
     const layanan = 'lay_pub'
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,16 +56,25 @@ function FormPUB({ disabled }) {
     }, [nopel]);
 
     const handleUpdate = async () => {
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        
+        if (!hasFiles) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (ormasFile) formData.append('suket_ormas', ormasFile);
-        if (lksFile) formData.append('suket_lks', lksFile);
-        if (NPWPFile) formData.append('npwp', NPWPFile);
-        if (buktiFile) formData.append('bukti_setor', buktiFile);
-        if (rekeningFile) formData.append('rekening', rekeningFile);
-        if (legalFile) formData.append('surat_legal', legalFile);
-        if (suratMateraiFile) formData.append('surat_pernyataan_bermaterai', suratMateraiFile);
 
         try {
             const token = localStorage.getItem('token');
@@ -81,20 +100,28 @@ function FormPUB({ disabled }) {
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
-                responseType: 'blob'
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            const fileName = 'files.zip';
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${layanan}/${data.id}/product`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -196,84 +223,76 @@ function FormPUB({ disabled }) {
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
                     <InputFile
-                        id="ktp"
                         name="ktp"
                         label="KTP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
-                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="suket_ormas"
                         name="suket_ormas"
                         label="Surat Permohonan Pengajuan LKS"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setOrmasFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="suket_lks"
                         name="suket_lks"
                         label="Akta Notaris Pendirian"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setLksFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="npwp"
                         name="npwp"
                         label="NPWP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setNPWPFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="bukti_setor"
                         name="bukti_setor"
                         label="Anggaran Dasar dan Anggaran Rumah Tangga"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setBuktiFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="rekening"
                         name="rekening"
                         label="Struktur Organisasi"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setRekeningFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="surat_legal"
                         name="surat_legal"
                         label="Surat Keterangan Domisili"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setLegalFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="surat_pernyataan_bermaterai"
                         name="surat_pernyataan_bermaterai"
                         label="Biodata"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setSuratMateraiFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     {!disabled && (

@@ -8,13 +8,16 @@ import { useNavigate } from 'react-router-dom';
 
 function FormAdminSantunanKematian() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
+    const [selectedData, setFormData] = useState({
         NIK: "",
         namaLengkap: "",
+        gender: "",
         alamat: "",
         kecamatan: "",
         kelurahan: "",
         rt: "",
+        pendidikan: "",
+        pekerjaan: "",
         email: "",
         noTelepon: "",
         jml_tedampak: "",
@@ -29,27 +32,35 @@ function FormAdminSantunanKematian() {
         rekening: [],
     });
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({ ...selectedData, [name]: value });
+        const newErrors = { ...errors };
+        delete newErrors[name];
+        setErrors(newErrors);
     };
 
-    const handleFileChange = (e) => {
-        const { name, files } = e.target;
-        setFormData({ ...formData, [name]: files });
+    const handleFileChange = (name, files) => {
+        setFormData(prevState => ({ ...prevState, [name]: files }));
+        setErrors(prevState => ({ ...prevState, [name]: null }));
     };
 
     const handleKirimNIK = async () => {
         try {
-            const response = await api.get(`/getUserByNIK/${formData.NIK}`);
+            const response = await api.get(`/getUserByNIK/${selectedData.NIK}`);
             const data = response.data;
             setFormData({
-                ...formData,
+                ...selectedData,
                 namaLengkap: data.full_name || "",
+                gender: data.gender || "",
                 alamat: data.alamat || "",
                 kecamatan: data.kecamatan || "",
                 kelurahan: data.kelurahan || "",
                 rt: data.rt || "",
+                pekerjaan: data.pekerjaan || "",
+                pendidikan: data.pendidikan || "",
                 email: data.email || "",
                 noTelepon: data.no_telp || ""
             });
@@ -63,35 +74,48 @@ function FormAdminSantunanKematian() {
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!selectedData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (selectedData.ktp.length === 0) newErrors.ktp = 'Field tidak boleh kosong';
+        if (selectedData.surat_permohonan_santunan_kematian.length === 0) newErrors.surat_permohonan_santunan_kematian = 'Field tidak boleh kosong';
+        if (selectedData.akta_kematian.length === 0) newErrors.akta_kematian = 'Field tidak boleh kosong';
+        if (selectedData.suket_ahli_waris.length === 0) newErrors.suket_ahli_waris = 'Field tidak boleh kosong';
+        if (selectedData.sktm.length === 0) newErrors.sktm = 'Field tidak boleh kosong';
+        if (selectedData.kk.length === 0) newErrors.kk = 'Field tidak boleh kosong';
+        if (selectedData.rekening.length === 0) newErrors.rekening = 'Field tidak boleh kosong';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
-        // Validation checks
-        if (!formData.NIK || formData.ktp.length === 0 || formData.surat_permohonan_santunan_kematian.length === 0 || formData.akta_kematian.length === 0 || formData.suket_ahli_waris === 0 || formData.sktm === 0 || formData.kk === 0 || formData.rekening === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Harap mengisi semua field yang diperlukan',
-            });
+        window.scrollTo(0, 0);
+        if (!validateForm()) {
             return;
         }
 
-        const formDataToSend = new FormData();
-        formDataToSend.append('NIK', formData.NIK);
-        formDataToSend.append('ktp', formData.ktp[0]);
-        formDataToSend.append('surat_permohonan_santunan_kematian', formData.surat_permohonan_santunan_kematian[0]);
-        formDataToSend.append('akta_kematian', formData.akta_kematian[0]);
-        formDataToSend.append('suket_ahli_waris', formData.akta_kematian[0]);
-        formDataToSend.append('sktm', formData.sktm[0]);
-        formDataToSend.append('kk', formData.kk[0]);
-        formDataToSend.append('rekening', formData.rekening[0]);
-
         try {
             const token = localStorage.getItem('token');
-            const response = await api.post('/admin-upload-santunan-kematian', formDataToSend, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}`
-                }
+
+            const formData = new FormData();
+            const fields = ['ktp', 'surat_permohonan_santunan_kematian', 'akta_kematian', 'suket_ahli_waris', 'sktm', 'kk', 'rekening'];
+            fields.forEach(field => {
+                selectedData[field].forEach(file => {
+                    formData.append(field, file);
+                });
             });
+
+            formData.append('NIK', selectedData.NIK);
+    
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
+            const response = await api.post('/admin-upload-santunan-kematian', formData, config);
             console.log("Data submitted successfully:", response.data);
             Swal.fire({
                 title: "Good job!",
@@ -112,8 +136,9 @@ function FormAdminSantunanKematian() {
                     label="NIK"
                     name="NIK"
                     placeholder="Masukkan NIK"
-                    value={formData.NIK}
+                    value={selectedData.NIK}
                     onChange={handleChange}
+                    error={errors.NIK}
                 />
                 <div>
                     <div className="btn btn-primary" onClick={handleKirimNIK} style={{fontSize: '.9rem', marginTop: '-8px'}}>Pilih</div>
@@ -124,7 +149,16 @@ function FormAdminSantunanKematian() {
                 name="namaLengkap"
                 col="col-lg-6"
                 placeholder="Nama Lengkap"
-                value={formData.namaLengkap}
+                value={selectedData.namaLengkap}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Jenis Kelamin"
+                name="gender"
+                col="col-lg-6"
+                placeholder="Jenis Kelamin"
+                value={selectedData.gender}
                 onChange={handleChange}
                 disabled
             />
@@ -133,7 +167,7 @@ function FormAdminSantunanKematian() {
                 name="alamat"
                 col="col-lg-6"
                 placeholder="Alamat"
-                value={formData.alamat}
+                value={selectedData.alamat}
                 onChange={handleChange}
                 disabled
             />
@@ -142,7 +176,7 @@ function FormAdminSantunanKematian() {
                 name="kecamatan"
                 col="col-lg-6"
                 placeholder="Kecamatan"
-                value={formData.kecamatan}
+                value={selectedData.kecamatan}
                 onChange={handleChange}
                 disabled
             />
@@ -151,7 +185,7 @@ function FormAdminSantunanKematian() {
                 name="kelurahan"
                 col="col-lg-6"
                 placeholder="Kelurahan"
-                value={formData.kelurahan}
+                value={selectedData.kelurahan}
                 onChange={handleChange}
                 disabled
             />
@@ -160,7 +194,25 @@ function FormAdminSantunanKematian() {
                 name="rt"
                 col="col-lg-6"
                 placeholder="RT"
-                value={formData.rt}
+                value={selectedData.rt}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pendidikan Terakhir"
+                name="pendidikan"
+                col="col-lg-6"
+                placeholder="Pendidikan Terakhir"
+                value={selectedData.pendidikan}
+                onChange={handleChange}
+                disabled
+            />
+            <InputFieldLog 
+                label="Pekerjaan"
+                name="pekerjaan"
+                col="col-lg-6"
+                placeholder="Pekerjaan"
+                value={selectedData.pekerjaan}
                 onChange={handleChange}
                 disabled
             />
@@ -169,7 +221,7 @@ function FormAdminSantunanKematian() {
                 name="email"
                 col="col-lg-6"
                 placeholder="Email"
-                value={formData.email}
+                value={selectedData.email}
                 onChange={handleChange}
                 disabled
             />
@@ -178,7 +230,7 @@ function FormAdminSantunanKematian() {
                 name="noTelepon"
                 col="col-lg-6"
                 placeholder="No. Telepon"
-                value={formData.noTelepon}
+                value={selectedData.noTelepon}
                 onChange={handleChange}
                 disabled
             />
@@ -186,37 +238,44 @@ function FormAdminSantunanKematian() {
             <InputFile
                 label="KTP"
                 name="ktp"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('ktp', Array.from(e.target.files))}
+                error={errors.ktp}
             />
             <InputFile
                 label="Surat Permohonan Santunan Kematian"
                 name="surat_permohonan_santunan_kematian"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('surat_permohonan_santunan_kematian', Array.from(e.target.files))}
+                error={errors.surat_permohonan_santunan_kematian}
             />
             <InputFile
                 label="Akta Kematian"
                 name="akta_kematian"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('akta_kematian', Array.from(e.target.files))}
+                error={errors.akta_kematian}
             />
             <InputFile
                 label="Surat Keterangan Ahli Waris"
                 name="suket_ahli_waris"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('suket_ahli_waris', Array.from(e.target.files))}
+                error={errors.suket_ahli_waris}
             />
             <InputFile
                 label="Surat Keterangan Tidak Mampu (SKTM)"
                 name="sktm"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('sktm', Array.from(e.target.files))}
+                error={errors.sktm}
             />
             <InputFile
                 label="Kartu Keluarga (KK)"
                 name="kk"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('kk', Array.from(e.target.files))}
+                error={errors.kk}
             />
             <InputFile
                 label="Rekening"
                 name="rekening"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange('rekening', Array.from(e.target.files))}
+                error={errors.rekening}
             />
             <div className="text-end mt-3">
                 <div className="btn btn-primary" onClick={handleSubmit} style={{fontSize: '.9rem'}}>Kirim</div>

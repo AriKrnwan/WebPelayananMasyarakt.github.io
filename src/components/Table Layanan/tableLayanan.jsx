@@ -32,53 +32,19 @@ function TableLayanan({ data, layanan }) {
         setCurrentPage(currentPage - 1);
     };
 
-    const handleEditPengajuan = async (item) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await api.get(`/lay-${layanan}/${item.nopel}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            console.log('Data pengajuan yang berhasil diambil:', response.data);
-
-            // localStorage.setItem('selectedPengajuan', JSON.stringify(response.data));
-            navigate(`/${layanan}/edit-pengajuan/${item.nopel}`);
-        } catch (error) {
-            if (error.response && error.response.status === 401) {
-                console.error('Unauthorized: Please log in first.');
-            } else {
-                console.error('Error fetching data:', error);
-            }
-        }
+    const handleEditPengajuan = (item) => {
+        navigate(`/${layanan}/edit-pengajuan/${item.nopel}`);
     };
 
-    const handleDetailPengajuan = async (item) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await api.get(`/lay-${layanan}/${item.nopel}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            console.log('Data pengajuan yang berhasil diambil:', response.data);
-
-            // localStorage.setItem('selectedPengajuan', JSON.stringify(response.data));
-            navigate(`/${layanan}/detail-pengajuan/${item.nopel}`);
-        } catch (error) {
-            if (error.response && error.response.status === 401) {
-                console.error('Unauthorized: Please log in first.');
-            } else {
-                console.error('Error fetching data:', error);
-            }
-        }
+    const handleDetailPengajuan = (item) => {
+        navigate(`/${layanan}/detail-pengajuan/${item.nopel}`);
     };
 
     const handleDeleteConfirmation = (noLay) => {
         Swal.fire({
             title: "Apakah Anda yakin untuk membatalkan pengajuan?",
             showCancelButton: true,
-            confirmButtonText: "Iya",
+            confirmButtonText: "Iya, batalkan",
             icon: 'warning',
             confirmButtonColor: "#d33",
         }).then(async (result) => {
@@ -97,8 +63,7 @@ function TableLayanan({ data, layanan }) {
                     Authorization: `Bearer ${token}`
                 }
             });
-            window.location.reload();
-            Swal.fire("Berhasil dihapus!", "", "success");
+            Swal.fire("Berhasil dibatalkan!", "", "success");
         } catch (error) {
             console.error('Error deleting pengajuan:', error);
         }
@@ -112,13 +77,7 @@ function TableLayanan({ data, layanan }) {
         return new Date(dateString).toLocaleDateString('en-GB', options);
     };
 
-    const sortedData = [...data].sort((a, b) => {
-        const dateComparison = b.nopel.substr(2, 8) - a.nopel.substr(2, 8);
-        if (dateComparison !== 0) {
-            return dateComparison;
-        }
-        return parseInt(b.nopel.substr(10)) - parseInt(a.nopel.substr(10));
-    });
+    const sortedData = [...data].sort((a, b) => b.id - a.id);
 
     const getStatusClass = (status) => {
         switch (status) {
@@ -134,17 +93,6 @@ function TableLayanan({ data, layanan }) {
                 return '';
         }
     };
-
-    // Data dummy
-    const dummyData = [
-        { id: 1, nopel: 'NOP001', tanggal: '2024-06-20T10:30:00Z', status: 'Menunggu Validasi' },
-        { id: 2, nopel: 'NOP002', tanggal: '2024-06-19T11:00:00Z', status: 'Berkas Diproses' },
-        { id: 3, nopel: 'NOP003', tanggal: '2024-06-18T09:15:00Z', status: 'Ditolak' },
-        { id: 4, nopel: 'NOP004', tanggal: '2024-06-17T14:20:00Z', status: 'Diterima' },
-        { id: 5, nopel: 'NOP005', tanggal: '2024-06-16T12:45:00Z', status: 'Berkas Tidak Valid' }
-    ];
-
-    const displayedData = data.length > 0 ? sortedData : dummyData;
 
     return (
         <>
@@ -177,12 +125,12 @@ function TableLayanan({ data, layanan }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {displayedData.slice(startIndex, endIndex).map((item, index) => (
+                            {sortedData.slice(startIndex, endIndex).map((item, index) => (
                                 <tr key={index}>
                                     <td className='text-center col-no'>{startIndex + index + 1}</td>
                                     <td className="col-nopel">{item.nopel}</td>
                                     <td className="col-tanggal">{formatDate(item.tanggal)}</td>
-                                    <td className='col-status' >
+                                    <td className='col-status'>
                                         <span className={`p-1 rounded ubuntu-sans-medium ${getStatusClass(item.status)}`} style={{ fontSize: '.7rem' }}>
                                             {item.status}
                                         </span>
@@ -218,13 +166,13 @@ function TableLayanan({ data, layanan }) {
                 </div>
                 <div className="d-flex justify-content-between align-items-center mt-2">
                     <div className="showing-entries" style={{ fontSize: '.85rem' }}>
-                        Showing {Math.min(startIndex + 1, displayedData.length)} to {Math.min(endIndex, displayedData.length)} of {displayedData.length} entries
+                        Showing {Math.min(startIndex + 1, sortedData.length)} to {Math.min(endIndex, sortedData.length)} of {sortedData.length} entries
                     </div>
                     <div className="pagination d-flex gap-2">
                         <button className="btn btn-primary" onClick={handlePrevPage} disabled={currentPage === 1} style={{ fontSize: '.85rem' }}>
                             <IoIosArrowBack />
                         </button>
-                        <button className="btn btn-primary" onClick={handleNextPage} disabled={endIndex >= displayedData.length} style={{ fontSize: '.85rem' }}>
+                        <button className="btn btn-primary" onClick={handleNextPage} disabled={endIndex >= sortedData.length} style={{ fontSize: '.85rem' }}>
                             <IoIosArrowForward />
                         </button>
                     </div>

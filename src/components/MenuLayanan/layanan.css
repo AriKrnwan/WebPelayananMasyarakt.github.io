@@ -17,3 +17,8 @@
 #card-layanan .card{
     height: 228px;
 }
+
+#card-layanan .card:hover{
+    box-shadow: 2px 2px 20px rgb(48, 48, 48, .1);
+    transition: ease-in-out .3s;
+}

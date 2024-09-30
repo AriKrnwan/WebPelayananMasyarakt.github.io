@@ -42,15 +42,16 @@ function TablePengaduan() {
         const fetchData = async () => {
             try {
                 const userData = JSON.parse(localStorage.getItem('user'));
+                console.log(userData)
                 const token = localStorage.getItem('token');
 
-                if (!userData || !userData.id || !token) {
+                if (!userData || !userData.NIK || !token) {
                     console.error('Invalid user data or token.');
                     return;
                 }
 
                 const response = await api.get('/lay-pengaduan', {
-                    params: { user_id: userData.id },
+                    params: { user_nik: userData.NIK },
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -127,13 +128,13 @@ function TablePengaduan() {
                 <Table striped bordered hover className="fixed-table">
                     <thead>
                         <tr>
-                            <th className='text-center col-no'>No</th>
-                            <th className="col-nopel">No. Pelayanan</th>
-                            <th className="col-tanggal">Tanggal</th>
-                            <th className="col-tanggal">Masalah</th>
-                            <th className="col-tanggal">Harapan</th>
-                            <th className="col-status">Status</th>
-                            <th className="col-aksi">Aksi</th>
+                            <th className='text-center col-no' >No</th>
+                            <th className="col-nopel" style={{width: '160px'}}>No. Pelayanan</th>
+                            <th className="col-tanggal" style={{width: '120px'}}>Tanggal</th>
+                            <th className="col-tanggal"style={{width: '200px'}}>Masalah</th>
+                            <th className="col-tanggal"style={{width: '200px'}}>Harapan</th>
+                            <th className="col-status" style={{width: '120px'}}>Status</th>
+                            <th className="col-aksi" style={{width: '90px'}}>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>

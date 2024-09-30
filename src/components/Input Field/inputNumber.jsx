@@ -21,7 +21,7 @@ function InputNumber({ label, placeholder, disabled, name, value, onChange, erro
                 required
                 isInvalid={!!error} // Add validation state
             />
-            {error && <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>}
+            {error && <Form.Control.Feedback type="invalid" style={{ fontSize: '.85rem' }}>{error}</Form.Control.Feedback>}
         </div>
     );
 }

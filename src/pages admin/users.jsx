@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, useParams, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import SidebarAdmin from "../components admin/sidebar";
 import Topbar from "../components admin/topbar";
 import { Form, Table } from "react-bootstrap";
@@ -8,12 +8,22 @@ import api from "../components/api";
 import { RiPencilFill } from "react-icons/ri";
 import { IoMdTrash } from "react-icons/io";
 import Swal from "sweetalert2";
+import { IoEyeSharp } from "react-icons/io5";
 
 function Users() {
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [entriesPerPage, setEntriesPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
+
+    // const location = useLocation();
+
+    const getRole = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return user.role;
+    };
+    const role = getRole();
+    // const rolePrefix = role === 1 ? '/admin' : role === 3 ? '/kadis' : '';
 
     useEffect(() => {
         fetchData();
@@ -145,21 +155,23 @@ function Users() {
                                             Data Users
                                         </h5>
                                     </div>
-                                    <NavLink to='/admin/users/tambah-user' >
-                                        <div className="btn btn-success" style={{ fontSize: '.85rem' }}>
-                                            Tambah Data
-                                        </div>
-                                    </NavLink>
+                                    {role !== 3 && (
+                                        <NavLink to='/admin/users/tambah-user' >
+                                            <div className="btn btn-success" style={{ fontSize: '.85rem' }}>
+                                                Tambah Data
+                                            </div>
+                                        </NavLink>
+                                    )}
                                 </div>
-                                <div className="d-flex align-items-center justify-content-between">
-                                    <div className="show-entries d-flex align-items-center gap-1 mb-2 w-100">
+                                <div className="d-flex align-items-center justify-content-between mb-2">
+                                    <div className="show-entries d-flex align-items-center gap-1 w-100">
                                         <span style={{ fontSize: '.8rem' }}>Show</span>
                                         <Form.Control
                                             className='custom-entries px-1 text-center'
                                             as="select"
                                             value={entriesPerPage}
                                             onChange={handleEntriesPerPageChange}
-                                            style={{ fontSize: '.8rem', width: '10%' }}
+                                            style={{ fontSize: '.8rem', width: '48px' }}
                                         >
                                             <option value={10}>10</option>
                                             <option value={25}>25</option>
@@ -169,12 +181,12 @@ function Users() {
                                         <span style={{ fontSize: '.8rem' }}>entries</span>
                                     </div>
                                     <div className="search-bar w-100 d-flex align-items-center justify-content-end gap-2">
-                                        <span style={{ fontSize: '.8rem' }}>Search: </span>
                                         <Form.Control
                                             type="text"
                                             value={searchTerm}
                                             onChange={handleSearchChange}
-                                            style={{ fontSize: '.8rem', width: '36%' }}
+                                            style={{ fontSize: '.8rem', width: '180px' }}
+                                            placeholder="Search..."
                                         ></Form.Control>
                                     </div>
                                 </div>
@@ -203,17 +215,28 @@ function Users() {
                                                         {user.role === 1 ? 'Admin' : 'Pengguna'}
                                                     </td>
                                                     <td className="col-aksi">
-                                                        <NavLink to={`/admin/users/detail-user/${user.NIK}`}>
-                                                            <div className="btn btn-primary lh-1 p-1 me-1">
-                                                                <RiPencilFill size={'18px'} />
-                                                            </div>
-                                                        </NavLink>
-                                                        <div
-                                                            className="btn btn-danger lh-1 p-1 me-1"
-                                                            onClick={() => deleteUser(user.NIK)}
-                                                        >
-                                                            <IoMdTrash size={'18px'} />
-                                                        </div>
+                                                        {role !== 3 && (
+                                                            <>
+                                                                <NavLink to={`/admin/users/detail-user/${user.NIK}`}>
+                                                                    <div className="btn btn-primary lh-1 p-1 me-1">
+                                                                        <RiPencilFill size={'18px'} />
+                                                                    </div>
+                                                                </NavLink>
+                                                                <div
+                                                                    className="btn btn-danger lh-1 p-1 me-1"
+                                                                    onClick={() => deleteUser(user.NIK)}
+                                                                >
+                                                                    <IoMdTrash size={'18px'} />
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                        {role !== 1 && (
+                                                            <NavLink to={`/kadis/users/detail-user/${user.NIK}`}>
+                                                                <div className="btn btn-primary lh-1 p-1 me-1">
+                                                                    <IoEyeSharp size={'18px'} />
+                                                                </div>
+                                                            </NavLink>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             ))}

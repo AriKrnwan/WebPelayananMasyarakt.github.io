@@ -12,13 +12,23 @@ function FormPenyandangDisabilitas({ disabled }) {
     const { nopel } = useParams();
     const [data, setData] = useState(null);
     const navigate = useNavigate();
-    const [ktpFile, setKtpFile] = useState(null);
-    const [identitasFile, setIdentitas] = useState(null);
-    const [kkFile, setKKFile] = useState(null);
-    const [bpjsFile, setBPJSFile] = useState(null);
+    const [files, setFiles] = useState({
+        ktp: [],
+        identitas_anak: [],
+        kk: [],
+        bpjs: [],
+    });
     const [kebutuhan, setKebutuhan] = useState('');
     const [jenisDis, setJenisDis] = useState('');
     const layanan = 'lay_penyandang_disabilitas'
+
+    const handleFileChange = (e) => {
+        const { name, files: selectedFiles } = e.target;
+        setFiles(prevFiles => ({
+            ...prevFiles,
+            [name]: Array.from(selectedFiles)
+        }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,14 +56,31 @@ function FormPenyandangDisabilitas({ disabled }) {
     }, [nopel]);
 
     const handleUpdate = async () => {
+        const hasFiles = Object.values(files).some(fileArray => fileArray.length > 0);
+        const isFieldFilled = [
+            kebutuhan,
+            jenisDis
+        ].some(field => typeof field === 'string' ? field.trim() !== '' : field !== '');
+        
+        if (!hasFiles && !isFieldFilled) {
+            Swal.fire({
+                title: 'Field tidak terisi',
+                text: 'Masukkan Field untuk mengupdate',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         let formData = new FormData();
+        Object.keys(files).forEach(fileType => {
+            files[fileType].forEach(file => {
+                formData.append(fileType, file);
+            });
+        });
         formData.append('kebutuhan', kebutuhan);
         formData.append('jns_disabilitas', jenisDis);
         formData.append('id', data.id);
-        if (ktpFile) formData.append('ktp', ktpFile);
-        if (identitasFile) formData.append('identitas_anak', identitasFile);
-        if (kkFile) formData.append('kk', kkFile);
-        if (bpjsFile) formData.append('bpjs', bpjsFile);
 
         try {
             const token = localStorage.getItem('token');
@@ -79,20 +106,28 @@ function FormPenyandangDisabilitas({ disabled }) {
 
     const handleDownload = async () => {
         try {
-            const response = await api.get(`/download-file/${layanan}/${data.id}/product`, {
-                responseType: 'blob'
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-
-            const fileName = 'files.zip';
-            link.setAttribute('download', fileName);
-
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
+            const downloadURL = `/download-file/${layanan}/${data.id}/product`;
+            console.log('Download URL:', downloadURL);
+    
+            const response = await api.get(downloadURL);
+    
+            if (Array.isArray(response.data)) {
+                // If response is an array of URLs, download each file
+                for (let fileURL of response.data) {
+                    const fileResponse = await api.get(fileURL, { responseType: 'blob' });
+                    if (fileResponse.data instanceof Blob) {
+                        const fileBlobUrl = window.URL.createObjectURL(fileResponse.data);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = fileBlobUrl;
+                        downloadLink.setAttribute('download', fileURL.split('/').pop());
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    }
+                }
+            } else {
+                console.error('Unexpected response data:', response.data);
+            }
         } catch (error) {
             console.error('Error downloading file:', error);
         }
@@ -194,44 +229,40 @@ function FormPenyandangDisabilitas({ disabled }) {
                     )}
                     <h6 className='mt-4'>Data Berkas</h6>
                     <InputFile
-                        id="ktp"
                         name="ktp"
                         label="KTP"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
                         moreInfo='KTP ahli waris'
-                        onChange={(e) => setKtpFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="identitas_anak"
                         name="identitas_anak"
                         label="Identitas Anak"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setIdentitas(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="kk"
                         name="kk"
                         label="Kartu Keluarga (KK)"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setKKFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <InputFile
-                        id="bpjs"
                         name="bpjs"
                         label="BPJS KIS"
                         disabled={disabled || status !== "Menunggu Validasi"}
-                        filePath={data.id}
+                        id={data.id}
                         showDownloadButton={true}
-                        onChange={(e) => setBPJSFile(e.target.files[0])}
+                        onChange={handleFileChange}
                         table={layanan}
                     />
                     <TextAreaLog

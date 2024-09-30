@@ -97,6 +97,7 @@ function FormAdminInformasi() {
                                     label="Foto"
                                     name="foto"
                                     onChange={handleFileChange}
+                                    accept=".png,.jpg,.jpeg,.svg"
                                 />
                                 <div className="text-end mt-3">
                                     <div className="btn btn-primary" onClick={handleSubmit} style={{fontSize: '.9rem'}}>Kirim</div>

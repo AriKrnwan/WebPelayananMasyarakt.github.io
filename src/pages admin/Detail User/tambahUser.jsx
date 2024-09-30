@@ -76,21 +76,21 @@ function TambahUser() {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.role_id.trim()) newErrors.role_id = 'Role is required';
-        if (!formData.NIK.trim()) newErrors.NIK = 'NIK is required';
-        if (!formData.nama.trim()) newErrors.nama = 'Nama is required';
-        if (!formData.gender.trim()) newErrors.gender = 'Jenis Kelamin is required';
-        if (!formData.alamat.trim()) newErrors.alamat = 'Alamat is required';
-        if (!formData.kecamatan.trim()) newErrors.kecamatan = 'Kecamatan is required';
-        if (!formData.kelurahan.trim()) newErrors.kelurahan = 'Kelurahan is required';
-        if (!formData.rt.trim()) newErrors.rt = 'RT is required';
-        if (!formData.pendidikan.trim()) newErrors.pendidikan = 'Pendidikan is required';
-        if (!formData.pekerjaan.trim()) newErrors.pekerjaan = 'Pekerjaan is required';
-        if (!formData.email.trim()) newErrors.email = 'Email is required';
-        if (!formData.no_telepon.trim()) newErrors.no_telepon = 'No Telepon is required';
-        if (!formData.password.trim()) newErrors.password = 'Password is required';
-        else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
-        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+        if (!formData.role_id.trim()) newErrors.role_id = 'Field tidak boleh kosong';
+        if (!formData.NIK.trim()) newErrors.NIK = 'Field tidak boleh kosong';
+        if (!formData.nama.trim()) newErrors.nama = 'Field tidak boleh kosong';
+        if (!formData.gender.trim()) newErrors.gender = 'Field tidak boleh kosong';
+        if (!formData.alamat.trim()) newErrors.alamat = 'Field tidak boleh kosong';
+        if (!formData.kecamatan.trim()) newErrors.kecamatan = 'Field tidak boleh kosong';
+        if (!formData.kelurahan.trim()) newErrors.kelurahan = 'Field tidak boleh kosong';
+        if (!formData.rt.trim()) newErrors.rt = 'Field tidak boleh kosong';
+        if (!formData.pendidikan.trim()) newErrors.pendidikan = 'Field tidak boleh kosong';
+        if (!formData.pekerjaan.trim()) newErrors.pekerjaan = 'Field tidak boleh kosong';
+        if (!formData.email.trim()) newErrors.email = 'Field tidak boleh kosong';
+        if (!formData.no_telepon.trim()) newErrors.no_telepon = 'Field tidak boleh kosong';
+        if (!formData.password.trim()) newErrors.password = 'Field tidak boleh kosong';
+        else if (formData.password.length < 8) newErrors.password = 'Password setidaknya memiliki 8 karakter';
+        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Isi field confirm password harus sama dengan field password';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -105,8 +105,8 @@ function TambahUser() {
             const response = await axios.post(`${apiConfig.baseURL}/register`, formData);
             console.log(response.data);
             Swal.fire({
-                title: "Good job!",
-                text: "Pendaftaran berhasil. Silahkan login untuk mengakses layanan kami.",
+                title: "Pendaftaran Berhasil",
+                text: "Data berhasil ditambahkan",
                 icon: "success"
             });
             navigate('/admin/users');
@@ -115,7 +115,7 @@ function TambahUser() {
             Swal.fire({
                 icon: "error",
                 title: "NIK atau Email telah Terdaftar",
-                text: "NIK atau Email yang Anda masukkan sudah terdaftar dalam sistem kami. Silakan periksa kembali NIK dan Email Anda atau hubungi petugas pelayanan kami untuk bantuan lebih lanjut",
+                text: "NIK atau Email yang Anda masukkan sudah terdaftar dalam sistem. Silakan periksa kembali NIK dan Email yang diinputkan.",
             });
         }
     };
@@ -152,7 +152,8 @@ function TambahUser() {
                                     col="col-lg-6"
                                     options={[
                                         { value: 1, label: 'Admin' },
-                                        { value: 2, label: 'Pengguna' }
+                                        { value: 2, label: 'Pengguna' },
+                                        { value: 3, label: 'Kadis' },
                                     ]}
                                     value={formData.role_id}
                                     onChange={handleInputChange}
